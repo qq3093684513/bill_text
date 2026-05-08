@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>记账本 V2 - BillMaster</title>
+    <script src="https://storage.360buyimg.com/dist-dev/joycoder/fe-page-cdn/tailwindcss.js"></script>
+    <script src="https://storage.360buyimg.com/dist-dev/joycoder/fe-page-cdn/lucide.js"></script>
+    <script src="https://storage.360buyimg.com/dist-dev/joycoder/fe-page-cdn/chart.umd.min.js" defer></script>
+    <style>
+        /* ========== Semi Design Token v1.0 ========== */
+        :root {
+            --semi-black: 0,0,0; --semi-white: 255,255,255;
+            --semi-red-0: 254,242,237; --semi-red-5: 249,57,32; --semi-red-6: 213,37,21;
+            --semi-blue-0: 234,245,255; --semi-blue-5: 0,119,250; --semi-blue-6: 0,98,214;
+            --semi-green-0: 236,247,236; --semi-green-5: 59,179,70; --semi-green-6: 48,149,59;
+            --semi-orange-0: 255,248,234; --semi-orange-5: 252,136,0;
+            --semi-grey-0: 249,249,249; --semi-grey-1: 230,232,234; --semi-grey-2: 198,202,205;
+            --semi-grey-3: 167,171,176; --semi-grey-4: 136,141,146; --semi-grey-5: 107,112,117;
+            --semi-grey-6: 85,91,97; --semi-grey-7: 65,70,76; --semi-grey-8: 46,50,56; --semi-grey-9: 28,31,35;
+            --semi-brand-0: 234,245,255; --semi-brand-1: 203,231,254; --semi-brand-2: 152,205,253;
+            --semi-brand-5: 0,119,250; --semi-brand-6: 0,98,214; --semi-brand-7: 0,79,179;
+            --semi-color-primary: rgba(var(--semi-brand-5), 1);
+            --semi-color-success: rgba(var(--semi-green-5), 1);
+            --semi-color-warning: rgba(var(--semi-orange-5), 1);
+            --semi-color-danger: rgba(var(--semi-red-5), 1);
+            --semi-color-text-0: rgba(var(--semi-grey-9), 1);
+            --semi-color-text-1: rgba(var(--semi-grey-9), 0.8);
+            --semi-color-text-2: rgba(var(--semi-grey-9), 0.6);
+            --semi-color-text-3: rgba(var(--semi-grey-9), 0.35);
+            --semi-color-bg-0: rgba(var(--semi-white), 1);
+            --semi-color-bg-1: #f6f7f9;
+            --semi-color-fill-0: rgba(var(--semi-grey-8), 0.05);
+            --semi-color-fill-1: rgba(var(--semi-grey-8), 0.09);
+            --semi-color-border: rgba(var(--semi-grey-9), 0.08);
+            --semi-shadow-elevated: 0px 0px 1px 0px rgba(0,0,0,0.30), 0px 4px 14px 0px rgba(0,0,0,0.10);
+            --semi-shadow-2: 0px 2px 4px 0px rgba(0,0,0,0.08), 0px 0px 1px 0px rgba(0,0,0,0.10);
+            --semi-border-radius-small: 3px;
+            --semi-border-radius-medium: 6px;
+            --semi-border-radius-large: 12px;
+            --app-accent: rgba(var(--semi-brand-5), 1);
+            --app-accent-rgb: var(--semi-brand-5);
+            --app-accent-light: rgba(var(--semi-brand-0), 1);
+            /* Added smooth easing for interactions */
+            --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        
+        /* 深色模式 Token 注入 */
+        .dark-mode {
+            --semi-color-bg-0: rgba(22, 22, 26, 1);
+            --semi-color-bg-1: rgba(35, 36, 41, 1);
+            --semi-color-fill-0: rgba(255, 255, 255, 0.05);
+            --semi-color-fill-1: rgba(255, 255, 255, 0.09);
+            --semi-color-fill-2: rgba(255, 255, 255, 0.13);
+            --semi-color-border: rgba(255, 255, 255, 0.08);
+            --semi-color-text-0: rgba(249, 249, 249, 1);
+            --semi-color-text-1: rgba(249, 249, 249, 0.8);
+            --semi-color-text-2: rgba(249, 249, 249, 0.6);
+            --semi-color-text-3: rgba(249, 249, 249, 0.35);
+            --semi-color-disabled-text: rgba(255, 255, 255, 0.25);
+            --semi-color-disabled-bg: rgba(255, 255, 255, 0.08);
+            --semi-color-primary: rgba(var(--semi-brand-5), 1);
+            --semi-color-primary-hover: rgba(var(--semi-brand-6), 1);
+            --semi-color-primary-active: rgba(var(--semi-brand-7), 1);
+            --semi-color-primary-light-default: rgba(var(--semi-brand-5), 0.15);
+            --semi-color-link: rgba(101,178,252,1);
+            --semi-shadow-elevated: 0px 0px 1px 0px rgba(0,0,0,0.50), 0px 4px 14px 0px rgba(0,0,0,0.30);
+            --app-accent-light: rgba(50, 149, 251, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased; background: #e8ecf1; color: var(--semi-color-text-0);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode { background: #111; }
+
+        /* ========== 全局滚动条样式 ========== */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--semi-grey-9), 0.15); border-radius: 4px; }
+        .dark-mode ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(var(--semi-grey-9), 0.25); }
+        .dark-mode ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* ========== iPhone Mockup Frame ========== */
+        .phone-frame {
+            width: 390px; height: 844px; border-radius: 50px; background: #1a1a1a;
+            padding: 14px; box-shadow: 0 30px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.1) inset,
+            0 0 0 4px #2a2a2a, 0 0 0 6px #1a1a1a;
+            position: relative; overflow: hidden;
+        }
+        .phone-screen {
+            width: 100%; height: 100%; border-radius: 38px; background: var(--semi-color-bg-1);
+            overflow: hidden; position: relative; display: flex; flex-direction: column;
+            transition: background-color 0.3s;
+        }
+        /* Status bar */
+        .status-bar {
+            height: 54px; padding: 14px 28px 0; display: flex; justify-content: space-between; align-items: center;
+            background: var(--semi-color-bg-0); flex-shrink: 0; position: relative; z-index: 10;
+            transition: background-color 0.3s;
+        }
+        .status-time { font-size: 15px; font-weight: 600; letter-spacing: 0.5px; color: var(--semi-color-text-0); transition: color 0.3s; }
+        .status-icons { display: flex; align-items: center; gap: 6px; color: var(--semi-color-text-0); transition: color 0.3s; }
+        .status-icons i { width: 16px; height: 16px; }
+        .dynamic-island {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 34px; background: #000; border-radius: 20px; z-index: 20;
+        }
+
+        /* ========== App Shell ========== */
+        .app-content-area { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 110px; }
+        .app-content-area::-webkit-scrollbar { display: none; }
+
+        /* ========== Bottom TabBar ========== */
+        .tab-bar {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 84px;
+            background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: flex; align-items: flex-start; justify-content: space-around;
+            padding-top: 8px; padding-bottom: 24px; z-index: 50;
+            border-top: 0.5px solid var(--semi-color-border);
+            border-radius: 0 0 38px 38px; 
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .dark-mode .tab-bar { background: rgba(35,36,41,0.96); }
+
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; padding: 4px 6px; flex: 1; transition: all 0.2s var(--ease-spring); }
+        .tab-item .tab-icon { width: 24px; height: 24px; color: var(--semi-color-text-2); transition: color 0.2s; }
+        .tab-item .tab-label { font-size: 10px; color: var(--semi-color-text-2); transition: color 0.2s; font-weight: 500; }
+        .tab-item.active .tab-icon { color: var(--app-accent); transform: translateY(-2px); }
+        .tab-item.active .tab-label { color: var(--app-accent); font-weight: 600; }
+        
+        /* Centered FAB in Tab Bar */
+        .tab-fab-container { flex: 1; display: flex; justify-content: center; position: relative; }
+        .tab-fab {
+            position: absolute; top: -22px; width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--app-accent), rgba(var(--semi-brand-7),1));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(var(--app-accent-rgb), 0.4); cursor: pointer;
+            border: 4px solid #fff; z-index: 60; transition: transform 0.2s var(--ease-spring), box-shadow 0.2s, border-color 0.3s;
+        }
+        .tab-fab:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(var(--app-accent-rgb), 0.3); }
+        .dark-mode .tab-fab { border-color: rgba(35,36,41,1); }
+
+        /* ========== Page Views ========== */
+        .page-view { display: none; flex-direction: column; flex: 1; min-height: 0; }
+        .page-view.active { display: flex; animation: fade-in 0.3s ease; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-hdr { padding: 4px 20px 12px; background: var(--semi-color-bg-0); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; transition: background-color 0.3s;}
+        .page-hdr h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+        .page-hdr .hdr-actions { display: flex; gap: 8px; align-items: center; }
+        .page-hdr .hdr-actions i { width: 20px; height: 20px; color: var(--semi-color-text-2); cursor: pointer; transition: color 0.2s;}
+        .page-hdr .hdr-actions i:active { color: var(--app-accent); }
+
+        /* ========== Summary Hero Card ========== */
+        .summary-hero {
+            margin: 0 16px 12px; padding: 20px; border-radius: 16px; position: relative; overflow: hidden;
+            background: linear-gradient(135deg, rgba(var(--semi-brand-5),1), rgba(var(--semi-brand-7),1));
+            color: #fff; box-shadow: var(--semi-shadow-2); cursor: pointer; transition: transform 0.2s;
+        }
+        .summary-hero:active { transform: scale(0.98); }
+        .summary-hero::after {
+            content: ''; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px;
+            border-radius: 50%; background: rgba(255,255,255,0.08); filter: blur(4px);
+        }
+        .summary-hero .sh-period { font-size: 13px; opacity: 0.75; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+        .summary-hero .sh-amount { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px; }
+        .summary-hero .sh-row { display: flex; gap: 20px; }
+        .summary-hero .sh-col .sh-label { font-size: 11px; opacity: 0.65; }
+        .summary-hero .sh-col .sh-val { font-size: 16px; font-weight: 600; margin-top: 2px; }
+
+        /* ========== Search ========== */
+        .search-bar { margin: 8px 16px 6px; position: relative; }
+        .search-bar input {
+            width: 100%; height: 36px; border: 1px solid transparent; border-radius: 10px; padding: 0 16px 0 36px;
+            font-size: 13px; background: var(--semi-color-fill-0); color: var(--semi-color-text-0); outline: none; transition: all 0.2s;
+        }
+        .search-bar input:focus { background: var(--semi-color-bg-0); border-color: var(--app-accent); box-shadow: 0 0 0 2px rgba(var(--app-accent-rgb),0.15); }
+        .search-bar .s-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--semi-color-text-3); }
+
+        /* ========== Scroll Wheel Date Picker ========== */
+        .wheel-overlay { position: absolute; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.45); backdrop-filter: blur(2px); z-index:200; display:none; align-items:flex-end; justify-content:center; opacity: 0; transition: opacity 0.3s; }
+        .wheel-overlay.open { display:flex; opacity: 1;}
+        .wheel-sheet {
+            width:100%; background:var(--semi-color-bg-0); border-radius:16px 16px 0 0; overflow:hidden;
+            transform: translateY(100%); transition: transform 0.4s var(--ease-spring), background-color 0.3s;
+        }
+        .wheel-overlay.open .wheel-sheet { transform: translateY(0); }
+        .wheel-header {
+            display:flex; align-items:center; justify-content:space-between; padding:14px 20px;
+            border-bottom:0.5px solid var(--semi-color-border); transition: border-color 0.3s;
+        }
+        .wheel-header .wh-cancel { font-size:14px; color:var(--semi-color-text-2); cursor:pointer; }
+        .wheel-header .wh-title { font-size:15px; font-weight:600; color: var(--semi-color-text-0); }
+        .wheel-header .wh-confirm { font-size:14px; color:var(--app-accent); font-weight:600; cursor:pointer; }
+        .wheel-body { display:flex; height:220px; position:relative; overflow:hidden; }
+        .wheel-body::before, .wheel-body::after {
+            content:''; position:absolute; left:0; right:0; height:88px; z-index:5; pointer-events:none;
+        }
+        .wheel-body::before { top:0; background:linear-gradient(180deg, var(--semi-color-bg-0) 10%, transparent 100%); }
+        .wheel-body::after { bottom:0; background:linear-gradient(0deg, var(--semi-color-bg-0) 10%, transparent 100%); }
+        .wheel-highlight {
+            position:absolute; top:50%; left:0; right:0; height:44px; transform:translateY(-50%);
+            border-top:1px solid var(--semi-color-border); border-bottom:1px solid var(--semi-color-border);
+            background: var(--semi-color-fill-0); z-index:3; pointer-events:none;
+        }
+        .wheel-col { flex:1; overflow:hidden; position:relative; touch-action: pan-y; z-index:4;}
+        .wheel-col .wheel-scroll {
+            padding:88px 0; 
+            transition: transform 0.2s var(--ease-spring);
+        }
+        .wheel-col .wheel-item {
+            height:44px; display:flex; align-items:center; justify-content:center;
+            font-size:16px; color:var(--semi-color-text-2); transition:all 0.2s; user-select:none;
+        }
+        .wheel-col .wheel-item.active { color:var(--semi-color-text-0); font-weight:600; font-size:18px; }
+        .wheel-col .wheel-label {
+            position:absolute; top:50%; transform:translateY(-50%); right:8px;
+            font-size:13px; font-weight:600; color:var(--semi-color-text-0); z-index:6; pointer-events:none;
+        }
+        .wheel-quick-row { display:flex; gap:6px; padding:10px 16px; border-top:0.5px solid var(--semi-color-border); flex-wrap:wrap; }
+        .wheel-quick-btn {
+            padding:5px 12px; font-size:12px; border-radius:16px; border:1px solid var(--semi-color-border);
+            background:var(--semi-color-bg-0); cursor:pointer; color:var(--semi-color-text-2); transition:all 0.15s; font-weight:500;
+        }
+        .wheel-quick-btn:hover, .wheel-quick-btn.active { border-color:var(--app-accent); color:var(--app-accent); background:var(--app-accent-light); }
+
+        /* ========== Timeline ========== */
+        .tl-section { padding: 0 16px 0 20px; }
+        .tl-date-hdr { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 8px; position: relative; }
+        .tl-date-hdr .tl-date { font-size: 14px; font-weight: 700; color: var(--semi-color-text-0); }
+        .tl-date-hdr .tl-sum { font-size: 11px; color: var(--semi-color-text-3); }
+        .tl-day-group { position: relative; padding-left: 20px; }
+        .tl-day-group::before {
+            content: ''; position: absolute; left: 5px; top: 0; bottom: 0; width: 2px;
+            background: linear-gradient(180deg, var(--app-accent-light), var(--semi-color-fill-0));
+            border-radius: 1px;
+        }
+        .tl-day-group:last-child::before { bottom: 50%; }
+        .tl-dot {
+            position: absolute; left: -20px; top: 50%; transform: translateY(-50%);
+            width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--app-accent);
+            background: var(--semi-color-bg-0); z-index: 2; transition: background-color 0.3s;
+        }
+        .tl-dot.income { border-color: rgba(var(--semi-green-5),1); }
+        
+        .bill-item {
+            background: var(--semi-color-bg-0); border-radius: 14px; padding: 13px 14px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 12px; transition: transform 0.15s var(--ease-spring), box-shadow 0.15s, background-color 0.3s;
+            position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .bill-item:active { transform: scale(0.97); background: var(--semi-color-fill-0); }
+        .bill-item .cat-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .bill-item .bill-info { flex: 1; min-width: 0; }
+        .bill-item .bill-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--semi-color-text-0); }
+        .bill-item .bill-meta { font-size: 11px; color: var(--semi-color-text-3); margin-top: 2px; }
+        .bill-item .bill-amount { font-size: 16px; font-weight: 700; text-align: right; white-space: nowrap; }
+        .bill-item .bill-amount.income { color: var(--semi-color-success); }
+        .bill-item .bill-amount.expense { color: var(--semi-color-text-0); }
+
+        /* ========== Analysis ========== */
+        .analysis-tabs { display: flex; justify-content: space-between; width: 100%; padding: 0 20px; font-size: 15px; font-weight: 500; color: var(--semi-color-text-2); margin-bottom: 8px;}
+        .analysis-tab { cursor: pointer; position: relative; transition: color 0.2s; padding-bottom: 8px; flex: 1; text-align: center; }
+        .analysis-tab.active { color: var(--semi-color-text-0); font-weight: 600; }
+        .analysis-tab.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 16px; height: 3px; background: var(--app-accent); border-radius: 2px; }
+        .analysis-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 16px 16px; }
+        .analysis-date-btn { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--semi-color-text-0); }
+        .type-toggle-sm { display: flex; background: var(--semi-color-fill-0); border-radius: 16px; padding: 2px; }
+        .type-toggle-sm .tt-btn { padding: 5px 16px; font-size: 12px; font-weight: 600; border-radius: 14px; cursor: pointer; color: var(--semi-color-text-2); transition: all 0.2s; }
+        .type-toggle-sm .tt-btn.active { background: var(--app-accent-light); color: var(--app-accent); box-shadow: var(--semi-shadow-2); }
+        
+        .chart-box { background: var(--semi-color-bg-0); border-radius: var(--semi-border-radius-large); padding: 20px; margin: 0 16px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: background-color 0.3s;}
+        .chart-box .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 6px; color: var(--semi-color-text-0); }
+        .chart-canvas-wrap { position: relative; width: 100%; }
+        .chart-canvas-wrap canvas { width: 100% !important; max-height: 180px; }
+        .pie-legend { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .pie-legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+        .pie-legend-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .pie-legend-item .name { margin-left: 6px; flex: 1; color: var(--semi-color-text-1); }
+        .pie-legend-item .pct { font-weight: 700; color: var(--semi-color-text-0); }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 8px; }
+        .cal-head { text-align: center; font-size: 11px; color: var(--semi-color-text-2); margin-bottom: 4px; font-weight: 500; }
+        .cal-cell { background: var(--semi-color-bg-1); border-radius: 10px; padding: 8px 0; text-align: center; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--semi-color-border); transition: all 0.2s; }
+        .cal-cell.empty { background: transparent; border-color: transparent; }
+        .cal-cell.active { background: var(--app-accent-light); border-color: var(--app-accent-light); }
+        .cal-date { font-size: 14px; font-weight: 600; color: var(--semi-color-text-0); }
+        .cal-amt { font-size: 10px; color: var(--semi-color-text-2); }
+        .cal-cell.active .cal-date, .cal-cell.active .cal-amt { color: var(--app-accent); }
+
+        /* ========== Asset Page ========== */
+        .asset-hero {
+            margin: 0 16px 12px; padding: 20px; border-radius: 16px;
+            background: linear-gradient(135deg, rgba(var(--semi-grey-8),1), rgba(var(--semi-grey-9),1)); color: #fff;
+            box-shadow: var(--semi-shadow-2);
+        }
+        .asset-hero .net-label { font-size: 12px; opacity: 0.7; }
+        .asset-hero .net-amount { font-size: 28px; font-weight: 700; margin: 4px 0 14px; }
+        .asset-hero .asset-row { display: flex; justify-content: space-between; }
+        .asset-hero .asset-col .al { font-size: 11px; opacity: 0.6; }
+        .asset-hero .asset-col .av { font-size: 16px; font-weight: 600; margin-top: 2px; }
+        .asset-hero .asset-col .av.debt { color: rgba(var(--semi-red-5),1); }
+        .section-hdr { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; }
+        .section-hdr .sh-left { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--semi-color-text-0);}
+        .section-hdr .sh-left i { width: 16px; height: 16px; color: var(--app-accent); }
+        .section-hdr .sh-add { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--app-accent); cursor: pointer; font-weight: 500; transition: opacity 0.2s;}
+        .section-hdr .sh-add:active { opacity: 0.7; }
+        
+        .loan-card, .invest-card { background: var(--semi-color-bg-0); border-radius: 12px; padding: 12px 14px; margin: 0 16px 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: background-color 0.3s;}
+        .loan-card .loan-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .loan-card .loan-name { font-size: 13px; font-weight: 600; color: var(--semi-color-text-0);}
+        .loan-card .loan-detail { font-size: 11px; color: var(--semi-color-text-3); margin-top: 2px; }
+        .loan-card .loan-amt { text-align: right; color: var(--semi-color-text-0); }
+        .loan-card .loan-amt .v { font-size: 15px; font-weight: 700; }
+        .loan-card .loan-amt .l { font-size: 10px; color: var(--semi-color-text-3); }
+        .loan-progress { height: 4px; background: var(--semi-color-fill-0); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .loan-progress .fill { height: 100%; border-radius: 2px; background: var(--app-accent); transition: width 0.6s var(--ease-spring);}
+        
+        .debt-card { background: var(--semi-color-bg-0); border-radius: 12px; padding: 12px 14px; margin: 0 16px 8px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: background-color 0.3s;}
+        .debt-card .debt-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .debt-card .debt-info { flex: 1; }
+        .debt-card .debt-name { font-size: 13px; font-weight: 600; color: var(--semi-color-text-0);}
+        .debt-card .debt-meta { font-size: 11px; color: var(--semi-color-text-3); margin-top: 1px; }
+        .debt-card .debt-amt { font-size: 15px; font-weight: 700; }
+        .debt-card .debt-amt.lend { color: rgba(var(--semi-green-5),1); }
+        .debt-card .debt-amt.borrow { color: rgba(var(--semi-red-5),1); }
+        
+        .invest-card .invest-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; margin-bottom: 4px; }
+        .invest-card .invest-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .invest-card .invest-name { font-size: 13px; font-weight: 600; color: var(--semi-color-text-0);}
+        .invest-card .invest-sub { font-size: 11px; color: var(--semi-color-text-3); margin-top: 1px; }
+        .invest-card .invest-pnl { text-align: right; color: var(--semi-color-text-0);}
+        .invest-card .invest-rate { font-size: 12px; font-weight: 600; }
+        .invest-card .invest-val { font-size: 14px; font-weight: 700; margin-top: 1px; }
+        .invest-card .profit { color: rgba(var(--semi-green-5),1); }
+        .invest-card .loss { color: rgba(var(--semi-red-5),1); }
+        
+        /* Goal */
+        .goal-section { margin: 0 16px 12px; background: var(--semi-color-bg-0); border-radius: 12px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: background-color 0.3s;}
+        .goal-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; color: var(--semi-color-text-0);}
+        .bullet-chart { position: relative; height: 24px; background: var(--semi-color-fill-0); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+        .bullet-chart .bullet-actual { position: absolute; top: 3px; bottom: 3px; left: 0; border-radius: 3px; }
+        .bullet-chart .bullet-marker { position: absolute; top: -2px; bottom: -2px; width: 3px; border-radius: 2px; background: rgba(var(--semi-grey-8),1); }
+        .goal-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px; }
+        .goal-stat { padding: 8px; background: var(--semi-color-fill-0); border-radius: var(--semi-border-radius-medium); text-align: center; }
+        .goal-stat .gs-val { font-size: 15px; font-weight: 700; color: var(--app-accent); }
+        .goal-stat .gs-label { font-size: 9px; color: var(--semi-color-text-3); margin-top: 1px; }
+
+        /* ========== Me Page ========== */
+        .ocr-hero {
+            margin: 0 16px 12px; padding: 18px; border-radius: 16px;
+            background: linear-gradient(135deg, var(--app-accent), rgba(var(--semi-brand-7),1)); color: #fff;
+            box-shadow: var(--semi-shadow-2);
+        }
+        .ocr-hero .ocr-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .ocr-hero .ocr-desc { font-size: 12px; opacity: 0.8; margin-bottom: 14px; }
+        .ocr-btn {
+            width: 100%; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.95); color: var(--app-accent);
+            font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: opacity 0.2s;
+        }
+        .ocr-btn:active { opacity: 0.8; }
+        .acct-link {
+            background: var(--semi-color-bg-0); border-radius: 12px; padding: 12px 14px; margin: 0 16px 8px;
+            display: flex; align-items: center; gap: 10px; cursor: pointer; transition: transform 0.15s, background-color 0.3s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .acct-link:active { transform: scale(0.98); background: var(--semi-color-fill-0); }
+        .acct-link .al-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+        .acct-link .al-info { flex: 1; }
+        .acct-link .al-name { font-size: 13px; font-weight: 600; color: var(--semi-color-text-0);}
+        .acct-link .al-desc { font-size: 11px; color: var(--semi-color-text-3); margin-top: 1px; }
+        .acct-link .al-arrow { width: 14px; height: 14px; color: var(--semi-color-text-3); }
+        .security-note {
+            margin: 8px 16px; padding: 10px; background: var(--semi-color-fill-0); border-radius: 8px;
+            display: flex; gap: 6px; align-items: flex-start; font-size: 11px; color: var(--semi-color-text-3); line-height: 1.5;
+        }
+        .security-note i { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+
+        /* ========== Modal ========== */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);
+            z-index: 100; display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity 0.3s;
+        }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-sheet {
+            width: 100%; background: var(--semi-color-bg-0); border-radius: 20px 20px 0 0; max-height: 85%;
+            overflow-y: auto; transform: translateY(100%); transition: transform 0.4s var(--ease-spring), background-color 0.3s;
+        }
+        .modal-overlay.show .modal-sheet { transform: translateY(0); }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;
+            border-bottom: 0.5px solid var(--semi-color-border); position: sticky; top: 0; background: var(--semi-color-bg-0); z-index: 10; border-radius: 20px 20px 0 0;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .modal-header h3 { font-size: 16px; font-weight: 700; color: var(--semi-color-text-0);}
+        .modal-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--semi-color-fill-0); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;}
+        .modal-close:active { background: var(--semi-color-fill-1); }
+        .modal-body { padding: 14px 20px 20px; }
+        
+        /* Type toggle & OCR */
+        .ocr-entry {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            background: var(--app-accent-light);
+            border-radius: 12px; margin-bottom: 14px; cursor: pointer; transition: transform 0.15s, background-color 0.3s;
+        }
+        .ocr-entry:active { transform: scale(0.97); }
+        
+        .type-toggle { display: flex; background: var(--semi-color-fill-1); border-radius: 20px; padding: 3px; margin-bottom: 14px; transition: background-color 0.3s; }
+        .type-toggle-btn { flex: 1; padding: 7px; text-align: center; font-size: 13px; font-weight: 600; border-radius: 18px; cursor: pointer; transition: all 0.2s; color: var(--semi-color-text-2); }
+        body:not(.dark-mode) .type-toggle-btn.active { background: #fff; }
+        .dark-mode .type-toggle-btn.active { background: var(--semi-color-bg-1); }
+        .type-toggle-btn.active { color: var(--semi-color-text-0); box-shadow: var(--semi-shadow-2); }
+        
+        /* Category grid */
+        .cat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
+        .cat-grid-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 6px 2px; border-radius: 10px; transition: all 0.15s; }
+        .cat-grid-item:active { transform: scale(0.95); }
+        .cat-grid-item.selected { background: var(--app-accent-light); }
+        .cat-grid-item .cg-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;}
+        .cat-grid-item.selected .cg-icon { transform: scale(1.05); }
+        .cat-grid-item .cg-name { font-size: 10px; color: var(--semi-color-text-2); text-align: center; }
+        .cat-grid-item.selected .cg-name { color: var(--app-accent); font-weight: 600; }
+        
+        /* Form */
+        .form-group { margin-bottom: 12px; }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--semi-color-text-1); margin-bottom: 5px; display: block; }
+        .form-input {
+            width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--semi-color-border);
+            border-radius: 10px; font-size: 14px; outline: none; transition: all 0.2s; background: var(--semi-color-bg-0); color: var(--semi-color-text-0);
+        }
+        .form-input::placeholder { color: var(--semi-color-text-3); }
+        .form-input:focus { border-color: var(--app-accent); box-shadow: 0 0 0 3px rgba(var(--app-accent-rgb),0.15); }
+        .form-amount { font-size: 32px; font-weight: 700; text-align: center; border: none; border-bottom: 2px solid var(--semi-color-border); border-radius: 0; padding: 8px 0; background: transparent; color: var(--semi-color-text-0); }
+        .form-amount::placeholder { color: var(--semi-color-text-3); }
+        .form-amount:focus { border-bottom-color: var(--app-accent); box-shadow: none; background: transparent; }
+        
+        .btn-primary {
+            width: 100%; height: 44px; border: none; border-radius: 12px; background: var(--app-accent); color: #fff;
+            font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s var(--ease-spring);
+        }
+        .btn-primary:active { opacity: 0.85; transform: scale(0.97); }
+        .btn-outline {
+            width: 100%; height: 44px; border: 1px solid var(--semi-color-border); border-radius: 12px;
+            background: var(--semi-color-bg-0); color: var(--semi-color-text-1); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s var(--ease-spring);
+        }
+        .btn-outline:active { transform: scale(0.97); background: var(--semi-color-fill-0); }
+        
+        /* Context menu - Smart positioning added in JS */
+        .ctx-menu { position: absolute; z-index: 200; background: var(--semi-color-bg-0); border-radius: 12px; box-shadow: var(--semi-shadow-elevated); padding: 4px 0; min-width: 120px; display: none; opacity: 0; transition: opacity 0.15s, background-color 0.3s; border: 1px solid var(--semi-color-border);}
+        .ctx-menu.show { display: block; opacity: 1; }
+        .ctx-menu-item { padding: 10px 14px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.15s; color: var(--semi-color-text-0);}
+        .ctx-menu-item:active { background: var(--semi-color-fill-0); }
+        .ctx-menu-item.danger { color: rgba(var(--semi-red-5),1); }
+        .ctx-menu-item i { width: 16px; height: 16px; }
+
+        /* Smart note suggestion */
+        .note-suggestions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .note-sug {
+            padding: 4px 10px; background: var(--semi-color-fill-0); border-radius: 14px;
+            font-size: 11px; color: var(--semi-color-text-2); cursor: pointer; transition: all 0.15s;
+        }
+        .note-sug:active { background: var(--app-accent-light); color: var(--app-accent); transform: scale(0.95);}
+    </style>
+</head>
+<body>
+<div class="phone-frame"><div class="dynamic-island"></div><div class="phone-screen">
+<div class="status-bar"><span class="status-time">9:41</span><div class="status-icons"><i data-lucide="signal" style="width:14px;height:14px;"></i><i data-lucide="wifi" style="width:14px;height:14px;"></i><i data-lucide="battery-full" style="width:16px;height:16px;"></i></div></div>
+
+<!-- PAGE: 明细 -->
+<div class="page-view active" id="page-detail">
+<div class="page-hdr" style="justify-content: flex-end;"><div class="hdr-actions"><i data-lucide="calendar" style="width:22px;height:22px;cursor:pointer;" onclick="openDatePicker('range')"></i></div></div>
+<div class="app-content-area" id="detailContent">
+<div class="summary-hero" onclick="openDatePicker('range')">
+    <div class="sh-period"><span id="heroPeriod">2026.04.01 - 2026.04.18</span> <i data-lucide="chevron-down" style="width:14px;height:14px;opacity:0.6;"></i></div>
+    <div class="sh-amount">¥ <span id="heroExpense">912.90</span></div>
+    <div class="sh-row"><div class="sh-col"><div class="sh-label">收入</div><div class="sh-val">¥ <span id="heroIncome">15,000.00</span></div></div><div class="sh-col"><div class="sh-label">结余</div><div class="sh-val">¥ <span id="heroBalance">14,087.10</span></div></div></div>
+</div>
+<div class="search-bar"><i data-lucide="search" class="s-icon"></i><input type="text" placeholder="搜索账单备注、分类..." id="searchInput"></div>
+<div class="tl-section" id="billTimeline"></div>
+</div>
+</div> 
+
+<!-- PAGE: 分析 -->
+<div class="page-view" id="page-analysis">
+    <div class="page-hdr" style="padding-bottom: 0;">
+        <div class="analysis-tabs" id="analysisTabs">
+            <span class="analysis-tab" data-gran="day">天度</span>
+            <span class="analysis-tab" data-gran="week">周度</span>
+            <span class="analysis-tab active" data-gran="month">月度</span>
+            <span class="analysis-tab" data-gran="year">年度</span>
+        </div>
+    </div>
+    <div class="analysis-header">
+        <div class="analysis-date-btn" onclick="openDatePicker(analysisGranularity)">
+            <span id="analysisMonthLabel">2026年4月</span> 
+            <i data-lucide="chevron-down" style="width:20px;height:20px;color:var(--semi-color-text-2)"></i>
+        </div>
+        <div class="type-toggle-sm" id="analysisTypeToggle">
+            <div class="tt-btn active" data-type="expense">支出</div>
+            <div class="tt-btn" data-type="income">收入</div>
+        </div>
+    </div>
+    <div class="app-content-area" style="padding-top: 4px;">
+        <div class="chart-box" id="trendChartBox">
+            <div class="chart-title"><i data-lucide="trending-up" style="width:18px;height:18px;color:var(--app-accent);"></i> <span class="c-title-text">当月支出趋势</span></div>
+            <div class="chart-canvas-wrap"><canvas id="trendChart"></canvas></div>
+        </div>
+        <div class="chart-box" id="barChartBox">
+            <div class="chart-title"><i data-lucide="bar-chart-2" style="width:18px;height:18px;color:var(--app-accent);"></i> <span class="c-title-text">历史支出对比</span></div>
+            <div class="chart-canvas-wrap"><canvas id="stackedChart"></canvas></div>
+        </div>
+        <div class="chart-box" id="pieChartBox">
+            <div class="chart-title"><i data-lucide="pie-chart" style="width:18px;height:18px;color:var(--app-accent);"></i> <span class="c-title-text">当月支出构成</span></div>
+            <div style="display:flex;align-items:center;gap:16px;">
+                <div class="chart-canvas-wrap" style="width:50%;"><canvas id="pieChart"></canvas></div>
+                <div class="pie-legend" id="pieLegend" style="flex:1;"></div>
+            </div>
+        </div>
+        <div class="chart-box" id="calendarBox">
+            <div class="chart-title"><i data-lucide="calendar-days" style="width:18px;height:18px;color:var(--app-accent);"></i> <span class="c-title-text">日历视图</span></div>
+            <div id="analysisCalendar"></div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE: 资产 -->
+<div class="page-view" id="page-asset">
+<div class="page-hdr"><h1>资产</h1><div class="hdr-actions"><i data-lucide="eye"></i></div></div>
+<div class="app-content-area">
+<div class="asset-hero"><div class="net-label">净资产 (元)</div><div class="net-amount">¥ 1,240,500.00</div><div class="asset-row"><div class="asset-col"><div class="al">总资产</div><div class="av">¥ 1,560,000</div></div><div class="asset-col"><div class="al">总负债</div><div class="av debt">¥ 319,500</div></div></div></div>
+<div class="section-hdr"><div class="sh-left"><i data-lucide="landmark"></i> 贷款</div><div class="sh-add" onclick="showModal('addLoanModal')"><i data-lucide="plus" style="width:12px;height:12px;"></i> 添加</div></div><div id="loanList"></div>
+<div class="section-hdr"><div class="sh-left"><i data-lucide="hand-coins"></i> 借贷</div><div class="sh-add" onclick="showModal('addDebtModal')"><i data-lucide="plus" style="width:12px;height:12px;"></i> 添加</div></div><div id="debtList"></div>
+<div class="section-hdr"><div class="sh-left"><i data-lucide="trending-up"></i> 投资</div><div class="sh-add" onclick="showModal('addInvestModal')"><i data-lucide="plus" style="width:12px;height:12px;"></i> 添加</div></div><div id="investList"></div>
+<div class="goal-section"><div class="goal-title"><i data-lucide="target" style="width:16px;height:16px;color:var(--app-accent);"></i> 资产目标</div><div style="font-size:11px;color:var(--semi-color-text-2);margin-bottom:6px;">目标: ¥2,000,000 | 截止: 2028-12-31</div><div class="bullet-chart"><div class="bullet-actual" style="width:62%;background:linear-gradient(90deg,var(--app-accent),rgba(var(--semi-brand-2),1));"></div><div class="bullet-marker" style="left:62%;"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--semi-color-text-3);"><span>¥0</span><span>62%</span><span>¥2,000,000</span></div><div class="goal-stats"><div class="goal-stat"><div class="gs-val">62.0%</div><div class="gs-label">达成率</div></div><div class="goal-stat"><div class="gs-val">¥759,500</div><div class="gs-label">剩余</div></div><div class="goal-stat"><div class="gs-val">¥23,109</div><div class="gs-label">每月需攒</div></div><div class="goal-stat"><div class="gs-val">¥770</div><div class="gs-label">每日需攒</div></div></div></div>
+</div></div>
+
+<!-- PAGE: 我的 -->
+<div class="page-view" id="page-me">
+<div class="page-hdr"><h1>我的</h1><div class="hdr-actions"><i data-lucide="settings"></i></div></div>
+<div class="app-content-area">
+<div class="me-profile" style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--semi-color-bg-0);margin-bottom:8px;transition:background-color 0.3s;">
+<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--app-accent),rgba(var(--semi-brand-7),1));display:flex;align-items:center;justify-content:center;"><i data-lucide="user" style="width:28px;height:28px;color:#fff;"></i></div>
+<div style="flex:1;"><div style="font-size:17px;font-weight:700;color:var(--semi-color-text-0);">用户</div><div style="font-size:12px;color:var(--semi-color-text-3);margin-top:2px;">ID: 88001234</div></div>
+<i data-lucide="chevron-right" style="width:18px;height:18px;color:var(--semi-color-text-3);"></i>
+</div>
+<div class="ocr-hero"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><div class="ocr-title">拍照记账</div><div class="ocr-desc">AI 自动识别票据，3秒极速入账</div></div><i data-lucide="scan" style="width:28px;height:28px;opacity:0.6;"></i></div><button class="ocr-btn" onclick="handleOCR()">立即拍照 / 上传图片</button></div>
+<div class="section-hdr" style="margin-top:8px;"><div class="sh-left"><i data-lucide="wrench"></i> 更多工具</div></div>
+<div style="padding:0 16px;">
+<div style="background:var(--semi-color-bg-0);border-radius:12px;overflow:hidden;transition:background-color 0.3s;">
+<div class="me-tool-row" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:0.5px solid var(--semi-color-border);cursor:pointer;">
+<i data-lucide="file-spreadsheet" style="width:18px;height:18px;color:var(--app-accent);"></i><span style="font-size:13px;font-weight:500;flex:1;color:var(--semi-color-text-0);">导出 Excel</span><i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--semi-color-text-3);"></i></div>
+<div class="me-tool-row" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:0.5px solid var(--semi-color-border);cursor:pointer;">
+<i data-lucide="bell" style="width:18px;height:18px;color:rgba(var(--semi-orange-5),1);"></i><span style="font-size:13px;font-weight:500;flex:1;color:var(--semi-color-text-0);">记账提醒</span><i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--semi-color-text-3);"></i></div>
+<div class="me-tool-row" style="display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;" onclick="toggleDarkMode()">
+<i data-lucide="moon" style="width:18px;height:18px;color:rgba(var(--semi-purple-5),1);"></i><span style="font-size:13px;font-weight:500;flex:1;color:var(--semi-color-text-0);" id="darkModeText">深色模式</span><i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--semi-color-text-3);"></i></div>
+</div></div>
+</div></div>
+
+<!-- Scroll Wheel Date Picker (Moved Globally) -->
+<div class="wheel-overlay" id="wheelOverlay">
+<div class="wheel-sheet">
+<div class="wheel-header">
+<span class="wh-cancel" onclick="closeWheel()">取消</span>
+<span class="wh-title">选择日期</span>
+<span class="wh-confirm" onclick="confirmWheel()">确定</span>
+</div>
+<div id="wheelTabsWrapper" style="padding:10px 16px 6px;display:flex;align-items:center;justify-content:center;gap:8px;">
+<div id="wheelTabStart" class="wheel-range-tab active" onclick="switchWheelTab('start')" style="padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:var(--app-accent);color:#fff;transition:all 0.2s;">开始: <span id="wheelStartLabel">2026-04-01</span></div>
+<span style="color:var(--semi-color-text-3);font-size:13px;">至</span>
+<div id="wheelTabEnd" class="wheel-range-tab" onclick="switchWheelTab('end')" style="padding:6px 16px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;background:var(--semi-color-fill-0);color:var(--semi-color-text-1);transition:all 0.2s;">结束: <span id="wheelEndLabel">2026-04-18</span></div>
+</div>
+<div class="wheel-body">
+<div class="wheel-highlight"></div>
+<div class="wheel-col" id="wheelYear"><div class="wheel-scroll" id="wheelYearScroll"></div><div class="wheel-label">年</div></div>
+<div class="wheel-col" id="wheelMonth"><div class="wheel-scroll" id="wheelMonthScroll"></div><div class="wheel-label">月</div></div>
+<div class="wheel-col" id="wheelDay"><div class="wheel-scroll" id="wheelDayScroll"></div><div class="wheel-label">日</div></div>
+<div class="wheel-col" id="wheelWeek" style="display:none"><div class="wheel-scroll" id="wheelWeekScroll"></div><div class="wheel-label">周</div></div>
+</div>
+<div id="wheelQuickWrapper" class="wheel-quick-row">
+<div class="wheel-quick-btn" onclick="wheelQuick('today')">今天</div>
+<div class="wheel-quick-btn" onclick="wheelQuick('week')">本周</div>
+<div class="wheel-quick-btn active" onclick="wheelQuick('month')">本月</div>
+<div class="wheel-quick-btn" onclick="wheelQuick('quarter')">本季</div>
+<div class="wheel-quick-btn" onclick="wheelQuick('year')">今年</div>
+<div class="wheel-quick-btn" onclick="wheelQuick('all')">全部</div>
+</div>
+</div>
+</div>
+
+<!-- FAB + TabBar -->
+<div class="tab-bar">
+<div class="tab-item active" data-tab="detail"><i data-lucide="receipt-text" class="tab-icon"></i><span class="tab-label">明细</span></div>
+<div class="tab-item" data-tab="asset"><i data-lucide="wallet" class="tab-icon"></i><span class="tab-label">资产</span></div>
+<div class="tab-fab-container">
+    <div class="tab-fab" onclick="showAddBillModal()">
+        <i data-lucide="plus" style="color: #fff; width: 24px; height: 24px;"></i>
+    </div>
+</div>
+<div class="tab-item" data-tab="analysis"><i data-lucide="bar-chart-3" class="tab-icon"></i><span class="tab-label">分析</span></div>
+<div class="tab-item" data-tab="me"><i data-lucide="user" class="tab-icon"></i><span class="tab-label">我的</span></div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="addBillModal"><div class="modal-sheet"><div class="modal-header"><h3>记一笔</h3><button class="modal-close" onclick="closeModal('addBillModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button></div><div class="modal-body">
+<div class="ocr-entry" onclick="handleOCR()">
+<div style="width:36px;height:36px;border-radius:10px;background:var(--app-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="camera" style="width:18px;height:18px;color:#fff;"></i></div>
+<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--semi-color-text-0);">拍照识别</div><div style="font-size:11px;color:var(--semi-color-text-2);margin-top:1px;">AI 识别票据，自动填写金额和分类</div></div>
+<i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--semi-color-text-3);"></i></div>
+<div class="type-toggle" id="billTypeToggle"><div class="type-toggle-btn active" data-type="expense">支出</div><div class="type-toggle-btn" data-type="income">收入</div></div>
+<div class="form-group" style="text-align:center;margin-bottom:18px;"><div style="font-size:13px;color:var(--semi-color-text-2);margin-bottom:6px;">金额 (¥)</div><input type="number" class="form-input form-amount" placeholder="0.00" id="billAmount" step="0.01"></div>
+<div class="form-label">选择分类</div><div class="cat-grid" id="catGrid"></div>
+<div class="form-group"><label class="form-label">备注</label><input type="text" class="form-input" placeholder="添加备注..." id="billNote"><div class="note-suggestions" id="noteSuggestions"></div></div>
+<div style="display:flex;gap:8px;"><div class="form-group" style="flex:1;"><label class="form-label">日期</label><input type="date" class="form-input" id="billDate"></div><div class="form-group" style="flex:1;"><label class="form-label">时间</label><input type="time" class="form-input" id="billTime"></div></div>
+<button class="btn-primary" onclick="saveBill()" style="margin-top:6px;">保存</button>
+</div></div></div>
+
+<div class="modal-overlay" id="editBillModal"><div class="modal-sheet"><div class="modal-header"><h3>编辑账单</h3><button class="modal-close" onclick="closeModal('editBillModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button></div><div class="modal-body">
+<div class="type-toggle" id="editBillTypeToggle"><div class="type-toggle-btn active" data-type="expense">支出</div><div class="type-toggle-btn" data-type="income">收入</div></div>
+<div class="form-group" style="text-align:center;margin-bottom:18px;"><div style="font-size:13px;color:var(--semi-color-text-2);margin-bottom:6px;">金额 (¥)</div><input type="number" class="form-input form-amount" placeholder="0.00" id="editBillAmount" step="0.01"></div>
+<div class="form-label">选择分类</div><div class="cat-grid" id="editCatGrid"></div>
+<div class="form-group"><label class="form-label">备注</label><input type="text" class="form-input" placeholder="备注..." id="editBillNote"></div>
+<div style="display:flex;gap:8px;"><div class="form-group" style="flex:1;"><label class="form-label">日期</label><input type="date" class="form-input" id="editBillDate"></div><div class="form-group" style="flex:1;"><label class="form-label">时间</label><input type="time" class="form-input" id="editBillTime"></div></div>
+<div style="display:flex;gap:8px;margin-top:6px;"><button class="btn-outline" onclick="deleteBill()" style="color:rgba(var(--semi-red-5),1);border-color:rgba(var(--semi-red-5),0.3);flex:1;">删除</button><button class="btn-primary" onclick="updateBill()" style="flex:2;">更新</button></div>
+</div></div></div>
+
+<div class="modal-overlay" id="addLoanModal"><div class="modal-sheet"><div class="modal-header"><h3>添加贷款</h3><button class="modal-close" onclick="closeModal('addLoanModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button></div><div class="modal-body">
+<div class="form-group"><label class="form-label">名称</label><input type="text" class="form-input" placeholder="房贷" id="loanName"></div>
+<div class="form-group"><label class="form-label">金额 (¥)</label><input type="number" class="form-input" placeholder="0" id="loanAmount"></div>
+<div style="display:flex;gap:8px;"><div class="form-group" style="flex:1;"><label class="form-label">年利率(%)</label><input type="number" class="form-input" placeholder="3.85" id="loanRate" step="0.01"></div><div class="form-group" style="flex:1;"><label class="form-label">总/已还期数</label><div style="display:flex;gap:4px;"><input type="number" class="form-input" placeholder="360" id="loanTerms" style="flex:1;"><input type="number" class="form-input" placeholder="120" id="loanPaid" style="flex:1;"></div></div></div>
+<button class="btn-primary" onclick="saveLoan()" style="margin-top:6px;">保存</button>
+</div></div></div>
+
+<div class="modal-overlay" id="addDebtModal"><div class="modal-sheet"><div class="modal-header"><h3>添加借贷</h3><button class="modal-close" onclick="closeModal('addDebtModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button></div><div class="modal-body">
+<div class="type-toggle" id="debtTypeToggle"><div class="type-toggle-btn active" data-type="lend">借出</div><div class="type-toggle-btn" data-type="borrow">借入</div></div>
+<div class="form-group"><label class="form-label">对方</label><input type="text" class="form-input" placeholder="张三" id="debtPerson"></div>
+<div style="display:flex;gap:8px;"><div class="form-group" style="flex:1;"><label class="form-label">金额 (¥)</label><input type="number" class="form-input" placeholder="0" id="debtAmount"></div><div class="form-group" style="flex:1;"><label class="form-label">日期</label><input type="date" class="form-input" id="debtDate"></div></div>
+<div class="form-group"><label class="form-label">备注</label><input type="text" class="form-input" placeholder="..." id="debtNote"></div>
+<button class="btn-primary" onclick="saveDebt()" style="margin-top:6px;">保存</button>
+</div></div></div>
+
+<div class="modal-overlay" id="addInvestModal"><div class="modal-sheet"><div class="modal-header"><h3>添加投资</h3><button class="modal-close" onclick="closeModal('addInvestModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button></div><div class="modal-body">
+<div class="form-group"><label class="form-label">类型</label><select class="form-input" id="investType" style="appearance:auto;"><option value="stock">股票</option><option value="fund">基金</option><option value="bond">债券</option><option value="crypto">数字货币</option><option value="other">其他</option></select></div>
+<div class="form-group"><label class="form-label">名称</label><input type="text" class="form-input" placeholder="腾讯控股" id="investName"></div>
+<div style="display:flex;gap:8px;"><div class="form-group" style="flex:1;"><label class="form-label">数量</label><input type="number" class="form-input" placeholder="100" id="investQty"></div><div class="form-group" style="flex:1;"><label class="form-label">市值 (¥)</label><input type="number" class="form-input" placeholder="32450" id="investValue"></div></div>
+<div class="form-group"><label class="form-label">盈亏 (¥)</label><input type="number" class="form-input" placeholder="1240" id="investPnl" step="0.01"></div>
+<button class="btn-primary" onclick="saveInvest()" style="margin-top:6px;">保存</button>
+</div></div></div>
+
+<div class="ctx-menu" id="ctxMenu"><div class="ctx-menu-item" onclick="ctxEdit()"><i data-lucide="edit-3"></i> 编辑</div><div class="ctx-menu-item danger" onclick="ctxDelete()"><i data-lucide="trash-2"></i> 删除</div></div>
+</div></div>
+
+<script>
+/* ========== Chart DataLabels Plugin ========== */
+const barDataLabelsPlugin = {
+    id: 'barDataLabels',
+    afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const isDark = document.body.classList.contains('dark-mode');
+        ctx.font = '600 11px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = isDark ? 'rgba(249, 249, 249, 0.85)' : 'rgba(28, 31, 35, 0.85)';
+
+        chart.data.datasets.forEach((dataset, i) => {
+            const meta = chart.getDatasetMeta(i);
+            if (!meta.hidden) {
+                meta.data.forEach((element, index) => {
+                    const data = dataset.data[index];
+                    if (data > 0) {
+                        const { x, y } = element.tooltipPosition();
+                        let text = data >= 10000 ? (data / 1000).toFixed(2) + 'k' : (Number.isInteger(data) ? data : data.toFixed(2));
+                        ctx.fillText(text, x, y - 6);
+                    }
+                });
+            }
+        });
+    }
+};
+
+const lineDataLabelsPlugin = {
+    id: 'lineDataLabels',
+    afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const isDark = document.body.classList.contains('dark-mode');
+        ctx.font = '500 10px Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.65)' : 'rgba(28, 31, 35, 0.65)';
+
+        chart.data.datasets.forEach((dataset, i) => {
+            const meta = chart.getDatasetMeta(i);
+            if (!meta.hidden) {
+                meta.data.forEach((element, index) => {
+                    const data = dataset.data[index];
+                    if (data > 0) {
+                        const { x, y } = element.tooltipPosition();
+                        let text = data >= 10000 ? (data / 1000).toFixed(2) + 'k' : (Number.isInteger(data) ? data : data.toFixed(2));
+                        ctx.fillText(text, x, y - 8);
+                    }
+                });
+            }
+        });
+    }
+};
+
+/* ========== Categories ========== */
+const CATEGORIES = {
+expense: [
+{id:'food',name:'餐饮',icon:'utensils',color:'#f97316'},{id:'taxi',name:'打车',icon:'car',color:'#3b82f6'},
+{id:'bus',name:'公交',icon:'bus',color:'#06b6d4'},{id:'flight',name:'飞机',icon:'plane',color:'#8b5cf6'},
+{id:'train',name:'火车',icon:'train-front',color:'#10b981'},{id:'movie',name:'娱乐',icon:'clapperboard',color:'#ec4899'},
+{id:'shopping',name:'购物',icon:'shopping-bag',color:'#f43f5e'},{id:'coffee',name:'咖啡',icon:'coffee',color:'#92400e'},
+{id:'grocery',name:'超市',icon:'shopping-cart',color:'#059669'},{id:'phone',name:'话费',icon:'smartphone',color:'#6366f1'},
+{id:'electric',name:'水电',icon:'zap',color:'#eab308'},{id:'rent',name:'房租',icon:'home',color:'#0ea5e9'},
+{id:'medical',name:'医疗',icon:'heart-pulse',color:'#ef4444'},{id:'edu',name:'教育',icon:'graduation-cap',color:'#7c3aed'},
+{id:'clothes',name:'服饰',icon:'shirt',color:'#d946ef'},{id:'beauty',name:'美容',icon:'sparkles',color:'#f472b6'},
+{id:'sport',name:'运动',icon:'dumbbell',color:'#14b8a6'},{id:'pet',name:'宠物',icon:'paw-print',color:'#a855f7'},
+{id:'gift',name:'礼物',icon:'gift',color:'#e11d48'},{id:'travel',name:'旅行',icon:'map-pin',color:'#2563eb'},
+{id:'book',name:'书籍',icon:'book-open',color:'#0891b2'},{id:'game',name:'游戏',icon:'gamepad-2',color:'#7c3aed'},
+{id:'music',name:'音乐',icon:'music',color:'#db2777'},{id:'smoke',name:'烟酒',icon:'cigarette',color:'#78716c'},
+{id:'snack',name:'零食',icon:'candy',color:'#fb923c'},{id:'maintenance',name:'维修',icon:'wrench',color:'#64748b'},
+{id:'insurance',name:'保险',icon:'shield',color:'#0d9488'},{id:'child',name:'育儿',icon:'baby',color:'#f472b6'},
+{id:'social',name:'社交',icon:'users',color:'#8b5cf6'},{id:'custom',name:'自定义',icon:'plus-circle',color:'#94a3b8'}
+],
+income: [
+{id:'salary',name:'工资',icon:'building-2',color:'#10b981'},{id:'bonus',name:'奖金',icon:'trophy',color:'#f59e0b'},
+{id:'invest_income',name:'理财',icon:'trending-up',color:'#3b82f6'},{id:'refund',name:'退款',icon:'rotate-ccw',color:'#06b6d4'},
+{id:'redpacket',name:'红包',icon:'heart',color:'#ef4444'},{id:'parttime',name:'兼职',icon:'briefcase',color:'#8b5cf6'},
+{id:'rental_in',name:'租金',icon:'key',color:'#0ea5e9'},{id:'other_in',name:'其他',icon:'circle-plus',color:'#94a3b8'}
+]};
+
+/* Smart note suggestions per category */
+const NOTE_MAP = {
+food:['午餐','晚餐','早餐','外卖','聚餐'],taxi:['上班','回家','机场'],coffee:['瑞幸','星巴克','Manner'],
+shopping:['淘宝','京东','拼多多'],grocery:['买菜','日用品'],phone:['充值'],clothes:['优衣库','ZARA'],
+snack:['奶茶','水果','零食'],sport:['健身房','游泳'],book:['技术书','小说']
+};
+
+/* ========== Data ========== */
+function generateMockBills(){
+    const bills=[];let id=1;
+    const expCats=['food','taxi','bus','coffee','grocery','phone','electric','rent','movie','shopping','clothes','snack','sport','book','smoke','medical','beauty','game','gift','travel','social','insurance'];
+    const incCats=['salary','bonus','invest_income','refund','redpacket','parttime','rental_in'];
+    const expNames={food:['午餐','晚餐','早餐','外卖','火锅','烧烤','面条','便当'],taxi:['打车上班','打车回家','打车去机场','滴滴出行'],bus:['地铁','公交','单车'],coffee:['瑞幸咖啡','星巴克','Manner','库迪'],grocery:['超市购物','买菜','日用品','水果'],phone:['话费充值','流量包'],electric:['电费','水费','燃气费'],rent:['房租'],movie:['电影票','视频会员','游戏充值'],shopping:['淘宝','京东','拼多多','网购'],clothes:['优衣库','ZARA','H&M','运动鞋'],snack:['奶茶','零食','水果','蛋糕'],sport:['健身房','游泳','瑜伽','羽毛球'],book:['技术书籍','小说','杂志'],smoke:['烟','红酒','白酒'],medical:['感冒药','体检','牙科'],beauty:['理发','护肤品','化妆品'],game:['Steam游戏','手游充值'],gift:['生日礼物','红包','伴手礼'],travel:['机票','酒店','门票'],social:['聚餐AA','KTV','团建'],insurance:['车险','医保','意外险']};
+    const incNames={salary:['工资收入'],bonus:['季度奖金','年终奖','绩效奖'],invest_income:['基金收益','股票分红','理财到期'],refund:['退款','退货'],redpacket:['微信红包','支付宝红包'],parttime:['兼职收入','稿费','咨询费'],rental_in:['房租收入']};
+    const amtRange={food:[12,200],taxi:[10,80],bus:[2,8],coffee:[9,40],grocery:[30,300],phone:[30,100],electric:[50,400],rent:[2500,5000],movie:[20,100],shopping:[30,800],clothes:[50,600],snack:[5,50],sport:[30,300],book:[20,120],smoke:[15,200],medical:[20,800],beauty:[30,500],game:[6,200],gift:[50,500],travel:[200,3000],social:[50,500],insurance:[100,3000]};
+    const start=new Date('2025-01-01'),end=new Date('2026-04-18');
+    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+        const ds=d.toISOString().slice(0,10);const m=d.getMonth(),dom=d.getDate(),dow=d.getDay();
+        const numExp=1+Math.floor(Math.random()*4)+(dow===0||dow===6?1:0);
+        for(let i=0;i<numExp;i++){
+            const catId=expCats[Math.floor(Math.random()*expCats.length)];
+            const names=expNames[catId]||['消费'];const name=names[Math.floor(Math.random()*names.length)];
+            const r=amtRange[catId]||[10,100];const amt=Math.round((r[0]+Math.random()*(r[1]-r[0]))*100)/100;
+            const h=7+Math.floor(Math.random()*14),mi=Math.floor(Math.random()*60);
+            bills.push({id:id++,type:'expense',catId,name,amount:amt,date:ds,time:`${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`,note:name});
+        }
+        if(dom===15){bills.push({id:id++,type:'income',catId:'salary',name:'工资收入',amount:15000+Math.floor(Math.random()*3000),date:ds,time:'09:00',note:'工资'});}
+        if(Math.random()<0.1){
+            const catId=incCats[Math.floor(Math.random()*incCats.length)];
+            if(catId!=='salary'){
+                const names=incNames[catId]||['收入'];const name=names[Math.floor(Math.random()*names.length)];
+                const amt=Math.round((50+Math.random()*2000)*100)/100;
+                bills.push({id:id++,type:'income',catId,name,amount:amt,date:ds,time:`${8+Math.floor(Math.random()*10)}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`,note:name});
+            }
+        }
+    }
+    return {bills,nextId:id};
+}
+const mockResult=generateMockBills();
+let billData=mockResult.bills;
+let loanData=[{id:1,name:'房贷 - 招商银行',amount:285000,rate:3.85,totalTerms:360,paidTerms:240}];
+let debtData=[{id:1,type:'lend',person:'张三',amount:5000,date:'2026-03-15',note:'转账截图'},{id:2,type:'borrow',person:'李四',amount:2000,date:'2026-04-01',note:''}];
+let investData=[{id:1,type:'stock',name:'腾讯控股 (00700.HK)',qty:100,value:32450,pnl:1240,rate:5.24},{id:2,type:'fund',name:'易方达蓝筹精选',qty:0,value:50000,pnl:-560,rate:-1.12}];
+let nextId=mockResult.nextId, editingId=null, ctxBillId=null, currentBillType='expense', selectedCatId=null;
+let calendarVisible=false, searchVisible=false;
+let dateRangeStart='2026-04-01', dateRangeEnd='2026-04-18';
+let dpVisible=false;
+
+/* ========== Tab Navigation ========== */
+document.querySelectorAll('.tab-item[data-tab]').forEach(t=>{
+t.addEventListener('click',()=>{
+    const id=t.dataset.tab;
+    document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.page-view').forEach(p=>p.classList.remove('active'));
+    const page=document.getElementById('page-'+id);
+    if(page){page.classList.add('active');}
+    if(id==='analysis') setTimeout(renderCharts,150);
+});});
+
+/* ========== Scroll Wheel Date Picker (Optimized with Physics) ========== */
+let wheelMode = 'range'; 
+let wheelTab = 'start'; 
+let wheelStartDate = {y:2026, m:4, d:1}, wheelEndDate = {y:2026, m:4, d:18};
+let wheelSingleDate = {y:2026, m:4, d:18, w:16};
+const ITEM_H = 44;
+
+function getISOWeek(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+}
+function getDateOfISOWeek(w, y) {
+    const jan4 = new Date(y, 0, 4);
+    const dayOfJan4 = jan4.getDay() || 7;
+    const week1Start = new Date(y, 0, 4 - dayOfJan4 + 1);
+    const targetWeekStart = new Date(week1Start);
+    targetWeekStart.setDate(week1Start.getDate() + (w - 1) * 7);
+    return targetWeekStart;
+}
+
+function openDatePicker(mode = 'range') {
+    wheelMode = mode;
+    dpVisible = true;
+    document.getElementById('wheelOverlay').classList.add('open');
+
+    const s = dateRangeStart.split('-');
+    const e = dateRangeEnd.split('-');
+    
+    document.getElementById('wheelTabsWrapper').style.display = mode === 'range' ? 'flex' : 'none';
+    document.getElementById('wheelQuickWrapper').style.display = mode === 'range' ? 'flex' : 'none';
+
+    document.getElementById('wheelYear').style.display = 'block';
+    document.getElementById('wheelMonth').style.display = (mode === 'range' || mode === 'day' || mode === 'month') ? 'block' : 'none';
+    document.getElementById('wheelDay').style.display = (mode === 'range' || mode === 'day') ? 'block' : 'none';
+    document.getElementById('wheelWeek').style.display = mode === 'week' ? 'block' : 'none';
+
+    document.querySelector('.wh-title').textContent = mode === 'range' ? '选择日期范围' : '选择时间';
+
+    if (mode === 'range') {
+        wheelStartDate = {y: +s[0], m: +s[1], d: +s[2]};
+        wheelEndDate = {y: +e[0], m: +e[1], d: +e[2]};
+        wheelTab = 'start';
+        updateWheelTabs();
+        renderWheels();
+    } else {
+        let dObj = new Date(+s[0], +s[1]-1, +s[2]);
+        wheelSingleDate = {y: +s[0], m: +s[1], d: +s[2], w: getISOWeek(dObj)};
+        renderWheels();
+    }
+}
+function toggleDatePicker() { openDatePicker('range'); }
+function closeWheel() { dpVisible=false; document.getElementById('wheelOverlay').classList.remove('open'); }
+function switchWheelTab(tab) { wheelTab=tab; updateWheelTabs(); renderWheels(); }
+
+function updateWheelTabs() {
+    if(wheelMode !== 'range') return;
+    const st=document.getElementById('wheelTabStart'),et=document.getElementById('wheelTabEnd');
+    if(wheelTab==='start'){
+        st.style.background='var(--app-accent)';st.style.color='#fff';st.style.fontWeight='600';
+        et.style.background='var(--semi-color-fill-0)';et.style.color='var(--semi-color-text-1)';et.style.fontWeight='500';
+    }else{
+        et.style.background='var(--app-accent)';et.style.color='#fff';et.style.fontWeight='600';
+        st.style.background='var(--semi-color-fill-0)';st.style.color='var(--semi-color-text-1)';st.style.fontWeight='500';
+    }
+    document.getElementById('wheelStartLabel').textContent=`${wheelStartDate.y}-${String(wheelStartDate.m).padStart(2,'0')}-${String(wheelStartDate.d).padStart(2,'0')}`;
+    document.getElementById('wheelEndLabel').textContent=`${wheelEndDate.y}-${String(wheelEndDate.m).padStart(2,'0')}-${String(wheelEndDate.d).padStart(2,'0')}`;
+}
+
+function renderWheels() {
+    const years = [2024, 2025, 2026, 2027];
+    const months = Array.from({length:12},(_,i)=>i+1);
+    if (wheelMode === 'range') {
+        const cur = wheelTab === 'start' ? wheelStartDate : wheelEndDate;
+        buildWheel('wheelYearScroll','wheelYear',years,cur.y,v=>{cur.y=v;fixDay();updateWheelTabs();});
+        buildWheel('wheelMonthScroll','wheelMonth',months,cur.m,v=>{cur.m=v;fixDay();updateWheelTabs();});
+        const dim = new Date(cur.y,cur.m,0).getDate();
+        buildWheel('wheelDayScroll','wheelDay',Array.from({length:dim},(_,i)=>i+1),cur.d,v=>{cur.d=v;updateWheelTabs();});
+    } else {
+        const cur = wheelSingleDate;
+        buildWheel('wheelYearScroll','wheelYear',years,cur.y,v=>{cur.y=v;fixSingleDay();});
+        if(wheelMode === 'month' || wheelMode === 'day') {
+            buildWheel('wheelMonthScroll','wheelMonth',months,cur.m,v=>{cur.m=v;fixSingleDay();});
+        }
+        if(wheelMode === 'day') {
+            const dim = new Date(cur.y, cur.m, 0).getDate();
+            buildWheel('wheelDayScroll','wheelDay',Array.from({length:dim},(_,i)=>i+1),cur.d,v=>{cur.d=v;});
+        }
+        if(wheelMode === 'week') {
+            buildWheel('wheelWeekScroll','wheelWeek',Array.from({length:53},(_,i)=>i+1),cur.w,v=>{cur.w=v;});
+        }
+    }
+}
+
+function fixDay() {
+    const cur = wheelTab === 'start' ? wheelStartDate : wheelEndDate;
+    const dim = new Date(cur.y,cur.m,0).getDate();
+    if(cur.d > dim) cur.d = dim;
+    const dimArr = Array.from({length:dim},(_,i)=>i+1);
+    buildWheel('wheelDayScroll','wheelDay',dimArr,cur.d,v=>{cur.d=v;updateWheelTabs();});
+}
+
+function fixSingleDay() {
+    if (wheelMode === 'day') {
+        const dim = new Date(wheelSingleDate.y, wheelSingleDate.m, 0).getDate();
+        if (wheelSingleDate.d > dim) wheelSingleDate.d = dim;
+    }
+    renderWheels(); 
+}
+
+function buildWheel(scrollId,colId,items,selected,onChange){
+    const scrollEl=document.getElementById(scrollId);
+    const colEl=document.getElementById(colId);
+    let html='';
+    items.forEach(v=>{html+=`<div class="wheel-item${v===selected?' active':''}" data-val="${v}">${v}</div>`;});
+    scrollEl.innerHTML=html;
+    
+    let idx=items.indexOf(selected);
+    if(idx < 0) idx = 0;
+    let currentY = -(idx*ITEM_H);
+    scrollEl.style.transform=`translateY(${currentY}px)`;
+    scrollEl.style.transition='transform 0.2s var(--ease-spring)';
+    
+    const newColEl = colEl.cloneNode(true);
+    colEl.parentNode.replaceChild(newColEl, colEl);
+    const newScrollEl = newColEl.querySelector('.wheel-scroll');
+    
+    let startY=0, lastY=0, isDragging=false, velocity=0, lastTime=0;
+    
+    function updateActive() {
+        const itemsEl = newScrollEl.querySelectorAll('.wheel-item');
+        let selIdx = Math.round(-currentY / ITEM_H);
+        selIdx = Math.max(0, Math.min(items.length - 1, selIdx));
+        itemsEl.forEach((el, i) => el.classList.toggle('active', i === selIdx));
+        return selIdx;
+    }
+
+    function onStart(y) {
+        isDragging = true; startY = y; lastY = y; lastTime = Date.now();
+        newScrollEl.style.transition = 'none';
+        const matrix = window.getComputedStyle(newScrollEl).transform;
+        if(matrix !== 'none') currentY = parseFloat(matrix.split(',')[5]);
+    }
+    
+    function onMove(y, e) {
+        if(!isDragging) return;
+        e.preventDefault();
+        const dy = y - lastY;
+        lastY = y;
+        currentY += dy;
+        
+        const maxScroll = 0;
+        const minScroll = -((items.length - 1) * ITEM_H);
+        if(currentY > maxScroll) currentY = maxScroll + (currentY - maxScroll) * 0.3;
+        if(currentY < minScroll) currentY = minScroll + (currentY - minScroll) * 0.3;
+        
+        newScrollEl.style.transform = `translateY(${currentY}px)`;
+        
+        const now = Date.now();
+        if(now - lastTime > 0) {
+            velocity = dy / (now - lastTime);
+            lastTime = now;
+        }
+        updateActive();
+    }
+    
+    function onEnd() {
+        if(!isDragging) return;
+        isDragging = false;
+        
+        currentY += velocity * 100; 
+        
+        let selIdx = Math.round(-currentY / ITEM_H);
+        selIdx = Math.max(0, Math.min(items.length - 1, selIdx));
+        currentY = -(selIdx * ITEM_H);
+        
+        newScrollEl.style.transition = 'transform 0.4s var(--ease-spring)';
+        newScrollEl.style.transform = `translateY(${currentY}px)`;
+        updateActive();
+        onChange(items[selIdx]);
+    }
+
+    newColEl.addEventListener('touchstart', e => onStart(e.touches[0].clientY), {passive:false});
+    newColEl.addEventListener('touchmove', e => onMove(e.touches[0].clientY, e), {passive:false});
+    newColEl.addEventListener('touchend', onEnd);
+    newColEl.addEventListener('mousedown', e => onStart(e.clientY));
+    window.addEventListener('mousemove', e => { if(isDragging) onMove(e.clientY, e); });
+    window.addEventListener('mouseup', onEnd);
+}
+
+function confirmWheel() {
+    if (wheelMode === 'range') {
+        dateRangeStart = `${wheelStartDate.y}-${String(wheelStartDate.m).padStart(2,'0')}-${String(wheelStartDate.d).padStart(2,'0')}`;
+        dateRangeEnd = `${wheelEndDate.y}-${String(wheelEndDate.m).padStart(2,'0')}-${String(wheelEndDate.d).padStart(2,'0')}`;
+        if(dateRangeEnd < dateRangeStart) { const t = dateRangeStart; dateRangeStart = dateRangeEnd; dateRangeEnd = t; }
+    } else if (wheelMode === 'day') {
+        const ds = `${wheelSingleDate.y}-${String(wheelSingleDate.m).padStart(2,'0')}-${String(wheelSingleDate.d).padStart(2,'0')}`;
+        dateRangeStart = ds; dateRangeEnd = ds;
+    } else if (wheelMode === 'week') {
+        const startDt = getDateOfISOWeek(wheelSingleDate.w, wheelSingleDate.y);
+        const endDt = new Date(startDt); endDt.setDate(startDt.getDate() + 6);
+        dateRangeStart = `${startDt.getFullYear()}-${String(startDt.getMonth()+1).padStart(2,'0')}-${String(startDt.getDate()).padStart(2,'0')}`;
+        dateRangeEnd = `${endDt.getFullYear()}-${String(endDt.getMonth()+1).padStart(2,'0')}-${String(endDt.getDate()).padStart(2,'0')}`;
+    } else if (wheelMode === 'month') {
+        const dim = new Date(wheelSingleDate.y, wheelSingleDate.m, 0).getDate();
+        dateRangeStart = `${wheelSingleDate.y}-${String(wheelSingleDate.m).padStart(2,'0')}-01`;
+        dateRangeEnd = `${wheelSingleDate.y}-${String(wheelSingleDate.m).padStart(2,'0')}-${String(dim).padStart(2,'0')}`;
+    } else if (wheelMode === 'year') {
+        dateRangeStart = `${wheelSingleDate.y}-01-01`;
+        dateRangeEnd = `${wheelSingleDate.y}-12-31`;
+    }
+    applyDateRange();
+    closeWheel();
+}
+
+function wheelQuick(range){
+    if(range==='today'){wheelStartDate={y:2026,m:4,d:18};wheelEndDate={y:2026,m:4,d:18};}
+    else if(range==='week'){wheelStartDate={y:2026,m:4,d:13};wheelEndDate={y:2026,m:4,d:19};}
+    else if(range==='month'){wheelStartDate={y:2026,m:4,d:1};wheelEndDate={y:2026,m:4,d:30};}
+    else if(range==='quarter'){wheelStartDate={y:2026,m:4,d:1};wheelEndDate={y:2026,m:6,d:30};}
+    else if(range==='year'){wheelStartDate={y:2026,m:1,d:1};wheelEndDate={y:2026,m:12,d:31};}
+    else if(range==='all'){wheelStartDate={y:2025,m:1,d:1};wheelEndDate={y:2026,m:4,d:18};}
+    
+    updateWheelTabs(); renderWheels();
+    document.querySelectorAll('.wheel-quick-btn').forEach(b=>b.classList.remove('active'));
+    if(typeof window !== 'undefined' && window.event && window.event.target) {
+        window.event.target.classList.add('active');
+    }
+}
+
+function applyDateRange(){
+    renderTimeline();
+    updateAnalysisLabels();
+    if(typeof renderCharts === 'function') {
+        updateChartVisibility();
+        renderCharts();
+    }
+    
+    const s = dateRangeStart.split('-');
+    const e = dateRangeEnd.split('-');
+    let label;
+    if(dateRangeStart === dateRangeEnd){label=`${s[0]}.${s[1]}.${s[2]}`;}
+    else{label=`${s[0]}.${s[1]}.${s[2]} - ${e[0]}.${e[1]}.${e[2]}`;}    
+    document.getElementById('heroPeriod').textContent=label;
+}
+
+function updateAnalysisLabels() {
+    const s = dateRangeStart.split('-');
+    const aLabel = document.getElementById('analysisMonthLabel');
+    if(!aLabel) return;
+    
+    if(analysisGranularity === 'day') {
+        aLabel.textContent = `${s[0]}年${parseInt(s[1])}月${parseInt(s[2])}日`;
+    } else if(analysisGranularity === 'week') {
+        const dObj = new Date(+s[0], +s[1]-1, +s[2]);
+        const w = getISOWeek(dObj);
+        aLabel.textContent = `${s[0]}年第${w}周`;
+    } else if(analysisGranularity === 'month') {
+        aLabel.textContent = `${s[0]}年${parseInt(s[1])}月`;
+    } else {
+        aLabel.textContent = `${s[0]}年`;
+    }
+}
+
+/* ========== Helpers ========== */
+function getCat(catId,type){const cats=type==='income'?CATEGORIES.income:CATEGORIES.expense;return cats.find(c=>c.id===catId)||cats[cats.length-1];}
+function fmt(n){return n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+/* ========== Render Timeline ========== */
+function renderTimeline(){
+    const c=document.getElementById('billTimeline');
+    const filtered=billData.filter(b=>b.date>=dateRangeStart&&b.date<=dateRangeEnd);
+    const grouped={};
+    const sorted=[...filtered].sort((a,b)=>a.date!==b.date?b.date.localeCompare(a.date):b.time.localeCompare(a.time));
+    sorted.forEach(b=>{if(!grouped[b.date])grouped[b.date]=[];grouped[b.date].push(b);});
+    const today='2026-04-18',yesterday='2026-04-17';
+    let html='';
+    Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).forEach(date=>{
+        const bills=grouped[date];
+        const dayExp=bills.filter(b=>b.type==='expense').reduce((s,b)=>s+b.amount,0);
+        const dayInc=bills.filter(b=>b.type==='income').reduce((s,b)=>s+b.amount,0);
+        const d=new Date(date);const m=d.getMonth()+1,dy=d.getDate();
+        let label=`${m}月${dy}日`;
+        if(date===today)label+=' 今天';else if(date===yesterday)label+=' 昨天';
+        let sum=[];if(dayExp>0)sum.push(`支-${dayExp.toFixed(0)}`);if(dayInc>0)sum.push(`收+${dayInc.toFixed(0)}`);
+        html+=`<div class="tl-date-hdr"><div class="tl-date">${label}</div><div class="tl-sum">${sum.join(' ')}</div></div>`;
+        html+='<div class="tl-day-group">';
+        bills.forEach(bill=>{
+            const cat=getCat(bill.catId,bill.type);
+            const amtStr=bill.type==='income'?`+${fmt(bill.amount)}`:`-${fmt(bill.amount)}`;
+            const dotCls=bill.type==='income'?'tl-dot income':'tl-dot';
+            html+=`<div class="bill-item" data-bid="${bill.id}" onclick="showCtxMenu(event,${bill.id})">
+<div class="${dotCls}"></div>
+<div class="cat-icon" style="background:${cat.color}15;"><i data-lucide="${cat.icon}" style="width:20px;height:20px;color:${cat.color};"></i></div>
+<div class="bill-info"><div class="bill-name">${bill.name}</div><div class="bill-meta">${bill.time} · ${cat.name}</div></div>
+<div class="bill-amount ${bill.type}">${amtStr}</div></div>`;
+        });
+        html+='</div>';
+    });
+    c.innerHTML=html;
+    updateSummary();
+    lucide.createIcons();
+}
+
+function updateSummary(){
+    const mb=billData.filter(b=>b.date>=dateRangeStart&&b.date<=dateRangeEnd);
+    const exp=mb.filter(b=>b.type==='expense').reduce((s,b)=>s+b.amount,0);
+    const inc=mb.filter(b=>b.type==='income').reduce((s,b)=>s+b.amount,0);
+    const bal=inc-exp;
+    document.getElementById('heroExpense').textContent=fmt(exp);
+    document.getElementById('heroIncome').textContent=fmt(inc);
+    document.getElementById('heroBalance').textContent=fmt(bal);
+    lucide.createIcons();
+}
+
+/* ========== Search ========== */
+document.getElementById('searchInput').addEventListener('input',function(e){
+    const q=e.target.value.toLowerCase();
+    document.querySelectorAll('.bill-item').forEach(item=>{
+        const n=item.querySelector('.bill-name').textContent.toLowerCase();
+        const m=item.querySelector('.bill-meta').textContent.toLowerCase();
+        item.style.display=(!q||n.includes(q)||m.includes(q))?'flex':'none';
+    });
+});
+
+/* ========== Context Menu ========== */
+function showCtxMenu(e,id){
+    e.stopPropagation(); ctxBillId=id;
+    const menu=document.getElementById('ctxMenu');
+    menu.style.display='block';
+    const menuRect = menu.getBoundingClientRect();
+    const targetRect = e.currentTarget.getBoundingClientRect();
+    const container = document.getElementById('detailContent');
+    const containerRect = container.getBoundingClientRect();
+    const screenRect = document.querySelector('.phone-screen').getBoundingClientRect();
+    
+    let top = (targetRect.bottom - containerRect.top) + container.scrollTop + 2;
+    let left = (targetRect.right - containerRect.left) + container.scrollLeft - menuRect.width;
+    
+    if (targetRect.bottom + menuRect.height > screenRect.bottom) {
+        top = (targetRect.top - containerRect.top) + container.scrollTop - menuRect.height - 2;
+    }
+    
+    if (left < 16) left = 16;
+    
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+    menu.style.right = 'auto'; 
+    menu.classList.add('show');
+}
+document.addEventListener('click',()=>{document.getElementById('ctxMenu').classList.remove('show');});
+function ctxEdit(){
+    const b=billData.find(x=>x.id===ctxBillId);if(!b)return;
+    editingId=b.id;
+    document.getElementById('editBillAmount').value=b.amount;
+    document.getElementById('editBillNote').value=b.note||b.name;
+    document.getElementById('editBillDate').value=b.date;
+    document.getElementById('editBillTime').value=b.time;
+    renderCatGrid('editCatGrid',b.type,b.catId);
+    showModal('editBillModal');
+}
+function ctxDelete(){if(confirm('删除这条账单？')){billData=billData.filter(x=>x.id!==ctxBillId);renderTimeline();}}
+
+/* ========== Modal ========== */
+function showModal(id){document.getElementById(id).classList.add('show');lucide.createIcons();}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});});
+
+/* ========== Category Grid ========== */
+function renderCatGrid(cid,type,selId){
+    const cats=CATEGORIES[type]||CATEGORIES.expense;
+    document.getElementById(cid).innerHTML=cats.map(c=>`
+<div class="cat-grid-item ${c.id===selId?'selected':''}" data-cat-id="${c.id}" onclick="selectCat('${cid}','${c.id}')">
+<div class="cg-icon" style="background:${c.color}15;"><i data-lucide="${c.icon}" style="width:18px;height:18px;color:${c.color};"></i></div>
+<div class="cg-name">${c.name}</div></div>`).join('');
+    lucide.createIcons();
+}
+function selectCat(cid,catId){
+    selectedCatId=catId;
+    document.querySelectorAll(`#${cid} .cat-grid-item`).forEach(i=>i.classList.toggle('selected',i.dataset.catId===catId));
+    if(cid==='catGrid'){
+        const sug=NOTE_MAP[catId]||[];
+        document.getElementById('noteSuggestions').innerHTML=sug.map(s=>`<span class="note-sug" onclick="document.getElementById('billNote').value='${s}'">${s}</span>`).join('');
+    }
+}
+
+/* ========== Type Toggle ========== */
+function setupToggle(tid,gid){
+document.querySelectorAll(`#${tid} .type-toggle-btn`).forEach(b=>{
+    b.addEventListener('click',()=>{
+        document.querySelectorAll(`#${tid} .type-toggle-btn`).forEach(x=>x.classList.remove('active'));
+        b.classList.add('active'); currentBillType=b.dataset.type; selectedCatId=null;
+        renderCatGrid(gid,currentBillType,null);
+    });
+});}
+setupToggle('billTypeToggle','catGrid');
+setupToggle('editBillTypeToggle','editCatGrid');
+
+/* ========== Add/Edit/Delete Bill ========== */
+function showAddBillModal(){
+    currentBillType='expense';selectedCatId=null;
+    document.getElementById('billAmount').value='';
+    document.getElementById('billNote').value='';
+    document.getElementById('billDate').value='2026-04-18';
+    document.getElementById('billTime').value=new Date().toTimeString().slice(0,5);
+    document.getElementById('noteSuggestions').innerHTML='';
+    document.querySelectorAll('#billTypeToggle .type-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.type==='expense'));
+    renderCatGrid('catGrid','expense',null);
+    showModal('addBillModal');
+}
+function saveBill(){
+    const amt=parseFloat(document.getElementById('billAmount').value);
+    if(!amt||!selectedCatId){alert('请填写金额并选择分类');return;}
+    const cat=getCat(selectedCatId,currentBillType);
+    billData.push({id:nextId++,type:currentBillType,catId:selectedCatId,name:document.getElementById('billNote').value||cat.name,
+        amount:amt,date:document.getElementById('billDate').value||'2026-04-18',time:document.getElementById('billTime').value||'12:00',note:cat.name});
+    closeModal('addBillModal');renderTimeline();
+}
+function updateBill(){
+    const b=billData.find(x=>x.id===editingId);if(!b)return;
+    b.amount=parseFloat(document.getElementById('editBillAmount').value)||b.amount;
+    b.name=document.getElementById('editBillNote').value||b.name;
+    b.date=document.getElementById('editBillDate').value||b.date;
+    b.time=document.getElementById('editBillTime').value||b.time;
+    if(selectedCatId){b.catId=selectedCatId;b.note=getCat(selectedCatId,b.type).name;}
+    closeModal('editBillModal');renderTimeline();
+}
+function deleteBill(){if(confirm('删除？')){billData=billData.filter(x=>x.id!==editingId);closeModal('editBillModal');renderTimeline();}}
+
+/* ========== Loan/Debt/Invest CRUD ========== */
+function saveLoan(){
+    loanData.push({id:Date.now(),name:document.getElementById('loanName').value||'新贷款',amount:parseFloat(document.getElementById('loanAmount').value)||0,
+    rate:parseFloat(document.getElementById('loanRate').value)||0,totalTerms:parseInt(document.getElementById('loanTerms').value)||0,paidTerms:parseInt(document.getElementById('loanPaid').value)||0});
+    closeModal('addLoanModal');renderAssetLists();}
+function saveDebt(){
+    const tp=document.querySelector('#debtTypeToggle .type-toggle-btn.active').dataset.type;
+    debtData.push({id:Date.now(),type:tp,person:document.getElementById('debtPerson').value||'未知',amount:parseFloat(document.getElementById('debtAmount').value)||0,
+    date:document.getElementById('debtDate').value||'2026-04-18',note:document.getElementById('debtNote').value});
+    closeModal('addDebtModal');renderAssetLists();}
+function saveInvest(){
+    const pnl=parseFloat(document.getElementById('investPnl').value)||0;
+    const val=parseFloat(document.getElementById('investValue').value)||0;
+    investData.push({id:Date.now(),type:document.getElementById('investType').value,name:document.getElementById('investName').value||'新投资',
+    qty:parseFloat(document.getElementById('investQty').value)||0,value:val,pnl:pnl,rate:val>0?((pnl/(val-pnl))*100):0});
+    closeModal('addInvestModal');renderAssetLists();}
+document.querySelectorAll('#debtTypeToggle .type-toggle-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#debtTypeToggle .type-toggle-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');});});
+
+/* ========== Render Asset Lists ========== */
+function renderAssetLists(){
+    document.getElementById('loanList').innerHTML=loanData.map(l=>{
+        const p=((l.paidTerms/l.totalTerms)*100).toFixed(0);
+        return`<div class="loan-card"><div class="loan-top"><div><div class="loan-name">${l.name}</div><div class="loan-detail">利率 ${l.rate}% · 剩余 ${l.totalTerms-l.paidTerms}/${l.totalTerms} 期</div></div><div class="loan-amt"><div class="v">¥ ${l.amount.toLocaleString()}</div><div class="l">待还总额</div></div></div><div class="loan-progress"><div class="fill" style="width:${p}%"></div></div></div>`;
+    }).join('');
+    document.getElementById('debtList').innerHTML=debtData.map(d=>{
+        const isL=d.type==='lend';const icon=isL?'arrow-down-left':'arrow-up-right';
+        const bg=isL?'rgba(var(--semi-green-0),1)':'rgba(var(--semi-red-0),1)';
+        const ic=isL?'rgba(var(--semi-green-5),1)':'rgba(var(--semi-red-5),1)';
+        return`<div class="debt-card"><div class="debt-icon" style="background:${bg};"><i data-lucide="${icon}" style="width:18px;height:18px;color:${ic};"></i></div><div class="debt-info"><div class="debt-name">${isL?'借给':'欠'} ${d.person}</div><div class="debt-meta">${d.date}${d.note?' · '+d.note:''}</div></div><div class="debt-amt ${isL?'lend':'borrow'}">${isL?'+':'-'}¥${d.amount.toLocaleString()}</div></div>`;
+    }).join('');
+    const tl={stock:'股票',fund:'基金',bond:'债券',crypto:'加密',other:'其他'};
+    const tc={stock:['rgba(var(--semi-brand-0),1)','rgba(var(--semi-brand-5),1)'],fund:['rgba(var(--semi-green-0),1)','rgba(var(--semi-green-5),1)'],bond:['#fef3c7','#d97706'],crypto:['#fae8ff','#a855f7'],other:['rgba(var(--semi-grey-0),1)','rgba(var(--semi-grey-5),1)']};
+    document.getElementById('investList').innerHTML=investData.map(inv=>{
+        const cl=tc[inv.type]||tc.other;const pc=inv.pnl>=0?'profit':'loss';
+        return`<div class="invest-card"><div class="invest-badge" style="background:${cl[0]};color:${cl[1]};">${tl[inv.type]||inv.type}</div><div class="invest-top"><div><div class="invest-name">${inv.name}</div><div class="invest-sub">${inv.qty>0?inv.qty+' 股 · ':''}¥${inv.value.toLocaleString()}</div></div><div class="invest-pnl"><div class="invest-rate ${pc}">${(inv.rate>=0?'+':'')}${inv.rate.toFixed(2)}%</div><div class="invest-val ${pc}">${(inv.pnl>=0?'+':'-')}¥${Math.abs(inv.pnl).toLocaleString()}</div></div></div></div>`;
+    }).join('');
+    lucide.createIcons();
+}
+
+function handleOCR(){alert('📸 拍照记账\n\nAI将自动识别票据中的商户名称、金额、时间、类型，识别后自动填入表单。');}
+
+/* ========== Charts & Analysis Calendar ========== */
+let trendC=null, pieC=null, stackC=null;
+let analysisType = 'expense';
+let analysisGranularity = 'month';
+
+// 监听分析页类型切换
+document.querySelectorAll('#analysisTypeToggle .tt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#analysisTypeToggle .tt-btn').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        analysisType = btn.dataset.type;
+        updateChartVisibility();
+        renderCharts();
+    });
+});
+
+// 监听分析页时间粒度切换并联动日历
+document.querySelectorAll('#analysisTabs .analysis-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('#analysisTabs .analysis-tab').forEach(x => x.classList.remove('active'));
+        tab.classList.add('active');
+        analysisGranularity = tab.dataset.gran;
+        
+        wheelMode = analysisGranularity;
+        const s = dateRangeStart.split('-');
+        const dObj = new Date(+s[0], +s[1]-1, +s[2]);
+        wheelSingleDate = {y: +s[0], m: +s[1], d: +s[2], w: getISOWeek(dObj)};
+        
+        confirmWheel(); 
+    });
+});
+
+function updateChartVisibility() {
+    const barBox = document.getElementById('barChartBox');
+    const calBox = document.getElementById('calendarBox');
+    const titleTrend = document.querySelector('#trendChartBox .c-title-text');
+    const titleBar = document.querySelector('#barChartBox .c-title-text');
+    const titlePie = document.querySelector('#pieChartBox .c-title-text');
+    
+    let pre = analysisType === 'expense' ? '支出' : '收入';
+    let granName = analysisGranularity === 'day' ? '当天' : analysisGranularity === 'week' ? '当周' : analysisGranularity === 'month' ? '当月' : '当年';
+    
+    if (analysisGranularity === 'day') {
+        if (titleTrend) titleTrend.textContent = `当天${pre}趋势`;
+        if (titlePie) titlePie.textContent = `当天${pre}构成`;
+    } else if (analysisGranularity === 'week') {
+        if (titleTrend) titleTrend.textContent = `周内${pre}趋势`;
+        if (titleBar) titleBar.textContent = `历史周度对比`;
+        if (titlePie) titlePie.textContent = `当周${pre}构成`;
+    } else if (analysisGranularity === 'month') {
+        if (titleTrend) titleTrend.textContent = `月内${pre}趋势`;
+        if (titleBar) titleBar.textContent = `历史月度对比`;
+        if (titlePie) titlePie.textContent = `当月${pre}构成`;
+    } else {
+        if (titleTrend) titleTrend.textContent = `年内${pre}趋势`;
+        if (titleBar) titleBar.textContent = `历史年度对比`;
+        if (titlePie) titlePie.textContent = `当年${pre}构成`;
+    }
+
+    if (barBox) barBox.style.display = (analysisGranularity === 'day') ? 'none' : 'block';
+    if (calBox) calBox.style.display = (analysisGranularity === 'month') ? 'block' : 'none';
+}
+
+function renderCharts(){
+    renderTrendChart();
+    renderStackedChart();
+    renderPieChart();
+    renderAnalysisCalendar();
+}
+
+function renderTrendChart(){
+    const ctx = document.getElementById('trendChart'); if(!ctx) return;
+    if(trendC) trendC.destroy();
+    
+    const isDark = document.body.classList.contains('dark-mode');
+    const tickColor = isDark ? 'rgba(255, 255, 255, 0.45)' : '#9ca3af';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+    
+    const ctx2d = ctx.getContext('2d');
+    const gradient = ctx2d.createLinearGradient(0, 0, 0, 180);
+    gradient.addColorStop(0, 'rgba(0, 119, 250, 0.25)');
+    gradient.addColorStop(1, 'rgba(0, 119, 250, 0)');
+
+    const isExp = analysisType === 'expense';
+    let labels, data;
+    
+    if(analysisGranularity === 'day') {
+        labels = ['00:00','04:00','08:00','12:00','16:00','20:00','24:00'];
+        data = isExp ? [0, 15, 35, 120, 80, 210, 45] : [0, 0, 0, 150, 0, 0, 0];
+    } else if(analysisGranularity === 'week') {
+        labels = ['周一','周二','周三','周四','周五','周六','周日'];
+        data = isExp ? [120, 45, 300, 15, 80, 210, 79] : [0, 0, 500, 0, 0, 0, 0];
+    } else if(analysisGranularity === 'month') {
+        labels = ['1日','5日','10日','15日','20日','25日','30日'];
+        data = isExp ? [200, 150, 400, 300, 120, 250, 180] : [0, 0, 0, 15000, 0, 0, 0];
+    } else {
+        labels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+        data = isExp ? [450, 380, 520, 410, 390, 460, 500, 480, 420, 510, 490, 550] : [1500, 1500, 1550, 1500, 1500, 1600, 1500, 1500, 1500, 1500, 1500, 2500];
+    }
+
+    trendC = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderColor: 'rgba(0, 119, 250, 1)',
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: 'rgba(0, 119, 250, 1)'
+            }]
+        },
+        options: {
+            responsive: true, 
+            maintainAspectRatio: false, 
+            layout: { padding: { top: 24, right: 14, left: 14 } }, // 增加内边距防止数字被截断
+            plugins: { legend: { display: false } },
+            scales: { 
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { font: { size: 10 }, color: tickColor },
+                    border: { display: false }
+                }, 
+                y: { 
+                    display: true, 
+                    position: 'left',
+                    border: { display: false },
+                    grid: {
+                        color: gridColor,
+                        drawBorder: false,
+                        borderDash: [4, 4]
+                    },
+                    ticks: {
+                        font: { size: 10 },
+                        color: tickColor,
+                        maxTicksLimit: 5,
+                        callback: function(value) {
+                            return value >= 10000 ? (value / 1000).toFixed(2) + 'k' : (Number.isInteger(value) ? value : value.toFixed(2));
+                        }
+                    },
+                    beginAtZero: true 
+                } 
+            }
+        },
+        plugins: [lineDataLabelsPlugin] // 为折线图注入数值插件
+    });
+}
+
+function renderStackedChart(){
+    const ctx = document.getElementById('stackedChart'); if(!ctx) return;
+    if(stackC) stackC.destroy();
+    
+    if (analysisGranularity === 'day') return;
+    
+    const isDark = document.body.classList.contains('dark-mode');
+    const isExp = analysisType === 'expense';
+    let labels, data;
+    
+    if(analysisGranularity === 'week') {
+        labels = ['前三周','前二周','上周','本周'];
+        data = isExp ? [1250, 1400, 980, 1150] : [0, 0, 0, 15000];
+    } else if(analysisGranularity === 'month') {
+        labels = ['11月','12月','1月','2月','3月','4月'];
+        data = isExp ? [4900, 5500, 4500, 3800, 5200, 4100] : [15000, 25000, 15000, 15000, 15500, 15000];
+    } else {
+        labels = ['2022','2023','2024','2025','2026'];
+        data = isExp ? [48000, 52000, 51500, 56000, 17600] : [180000, 185000, 190000, 200000, 60000];
+    }
+    
+    stackC = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: 'rgba(152, 205, 253, 1)',
+                hoverBackgroundColor: 'rgba(0, 119, 250, 1)',
+                borderRadius: 4,
+                borderSkipped: false,
+                barThickness: 16
+            }]
+        },
+        options: {
+            responsive: true, 
+            maintainAspectRatio: false, 
+            layout: { padding: { top: 20 } },
+            plugins: { legend: { display: false } },
+            scales: { 
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { font: { size: 10 }, color: isDark ? 'rgba(255, 255, 255, 0.45)' : '#9ca3af' },
+                    border: { display: false }
+                }, 
+                y: { display: false, beginAtZero: true } 
+            }
+        },
+        plugins: [barDataLabelsPlugin]
+    });
+}
+
+function renderPieChart(){
+    const ctx = document.getElementById('pieChart'); if(!ctx) return;
+    if(pieC) pieC.destroy();
+    
+    const isExp = analysisType === 'expense';
+    const pd = isExp 
+        ? [{n:'餐饮',v:34.8,c:'#f97316'},{n:'购物',v:14.1,c:'#f43f5e'},{n:'运动',v:21.8,c:'#14b8a6'},{n:'交通',v:12.4,c:'#3b82f6'},{n:'其他',v:16.9,c:'#94a3b8'}]
+        : [{n:'工资',v:95.0,c:'#10b981'},{n:'理财',v:3.0,c:'#3b82f6'},{n:'其他',v:2.0,c:'#94a3b8'}];
+        
+    pieC = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: pd.map(d=>d.n),
+            datasets: [{ data: pd.map(d=>d.v), backgroundColor: pd.map(d=>d.c), borderWidth: 2, borderColor: document.body.classList.contains('dark-mode') ? 'rgba(35, 36, 41, 1)' : '#fff' }]
+        },
+        options: { responsive: true, maintainAspectRatio: true, cutout: '65%', plugins: { legend: { display: false } } }
+    });
+    
+    document.getElementById('pieLegend').innerHTML = pd.map(d => `
+        <div class="pie-legend-item">
+            <div style="display:flex;align-items:center;gap:6px">
+                <div class="dot" style="background:${d.c}"></div>
+                <div class="name">${d.n}</div>
+            </div>
+            <div class="pct">${d.v}%</div>
+        </div>
+    `).join('');
+}
+
+function renderAnalysisCalendar() {
+    const container = document.getElementById('analysisCalendar');
+    if (!container) return;
+    
+    if (analysisGranularity !== 'month') {
+        container.innerHTML = '';
+        return;
+    }
+    
+    const parts = dateRangeStart.split('-');
+    const y = parseInt(parts[0]), m = parseInt(parts[1]) - 1;
+    
+    const dim = new Date(y, m+1, 0).getDate();
+    let f = new Date(y, m, 1).getDay();
+    f = f === 0 ? 6 : f - 1; 
+    
+    const monthPrefix = `${y}-${String(m+1).padStart(2,'0')}`;
+    const mb = billData.filter(b => b.date.startsWith(monthPrefix) && b.type === analysisType);
+    const dayMap = {};
+    mb.forEach(b => {
+        const d = parseInt(b.date.split('-')[2]);
+        dayMap[d] = (dayMap[d] || 0) + b.amount;
+    });
+
+    let html = '<div class="cal-grid">';
+    ['一','二','三','四','五','六','日'].forEach(w => { html += `<div class="cal-head">${w}</div>`; });
+    
+    for(let i = 0; i < f; i++) { html += `<div class="cal-cell empty"></div>`; }
+    for(let d = 1; d <= dim; d++) {
+        const amt = dayMap[d] ? dayMap[d].toFixed(0) : '-';
+        const isActive = (y === 2026 && m === 3 && d === 18);
+        html += `
+        <div class="cal-cell ${isActive ? 'active' : ''}">
+            <div class="cal-date">${isActive ? '今天' : d}</div>
+            <div class="cal-amt">${amt}</div>
+        </div>`;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    const txt = document.getElementById('darkModeText');
+    if(txt) txt.textContent = isDark ? '浅色模式' : '深色模式';
+    
+    if(typeof renderCharts === 'function') {
+        renderCharts();
+    }
+}
+
+/* ========== Init ========== */
+document.addEventListener('DOMContentLoaded',function(){
+    lucide.createIcons();
+    renderTimeline();
+    renderAssetLists();
+    document.getElementById('billDate').value='2026-04-18';
+});
+</script>
+</body>
+</html>

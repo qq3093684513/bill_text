@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渊锋 | Resume</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;
+            --text-main: #f5f5f7;
+            --text-secondary: #a1a1aa;
+            --accent-color: #2dd4bf;
+            --glass-bg: rgba(20, 20, 23, 0.015);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ----------------------------------
+           Hero Section 头部排版
+           ---------------------------------- */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .hero-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeUp 1s ease forwards;
+        }
+
+        .hero-header h1 {
+            font-size: 72px;
+            font-weight: 900;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+            font-family: "Arial Black", "PingFang SC", "Microsoft YaHei", sans-serif;
+            transform: skewX(-12deg);
+            display: inline-block;
+        }
+        
+        .hero-header .title {
+            color: var(--accent-color);
+            font-weight: 500;
+            font-size: 20px;
+            margin-bottom: 24px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .hero-header .contact-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-family: monospace; 
+        }
+
+        .contact-info .dot {
+            width: 4px;
+            height: 4px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+        }
+
+        /* 技能标签 - 移至顶部 */
+        .capsule-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            animation: fadeUp 1s ease 0.2s forwards;
+            opacity: 0;
+            margin-bottom: 60px;
+        }
+
+        .capsule {
+            background: transparent;
+            color: var(--accent-color);
+            padding: 10px 32px;
+            border-radius: 999px;
+            font-size: 15px;
+            font-family: monospace, sans-serif;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            border: 1px solid var(--accent-color);
+            transition: all 0.3s;
+            cursor: default;
+        }
+
+        .capsule:hover {
+            background: rgba(45, 212, 191, 0.1);
+            box-shadow: 0 0 15px rgba(45, 212, 191, 0.2);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ----------------------------------
+           Galaxy 银河系交互组件 (替换了原本的网格)
+           ---------------------------------- */
+        .galaxy-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            height: 560px;
+            margin: 0 auto 60px auto;
+            animation: fadeUp 1s ease 0.4s forwards;
+            opacity: 0;
+            perspective: 1000px;
+        }
+
+        /* 轨道 SVG 容器 */
+        .galaxy-orbits {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .orbit-ring {
+            fill: none;
+            stroke: rgba(45, 212, 191, 0.15);
+            stroke-width: 1.5;
+            stroke-dasharray: 6 6;
+        }
+
+        /* 核心 Personality */
+        .galaxy-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .core-sphere {
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #2dd4bf, #0f766e);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(45, 212, 191, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.5);
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        .core-label {
+            margin-top: 16px;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 15px rgba(45, 212, 191, 0.8);
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 30px rgba(45, 212, 191, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.5); }
+            100% { box-shadow: 0 0 60px rgba(45, 212, 191, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.8); }
+        }
+
+        /* 轨道节点 (行星) */
+        .planet-node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .planet-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(10, 20, 25, 0.8);
+            border: 1px solid rgba(45, 212, 191, 0.5);
+            border-radius: 14px;
+            box-shadow: 0 0 20px rgba(45, 212, 191, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #2dd4bf;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .planet-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .planet-node:hover .planet-icon {
+            box-shadow: 0 0 30px rgba(45, 212, 191, 0.7);
+            background: rgba(20, 40, 45, 0.9);
+            transform: scale(1.1);
+        }
+
+        .planet-label {
+            margin-top: 10px;
+            color: var(--accent-color);
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-shadow: 0 0 10px rgba(45, 212, 191, 0.4);
+            transition: all 0.3s;
+        }
+
+        .planet-node:hover .planet-label {
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+
+        /* 悬停弹出的简介卡片 Tooltip */
+        .planet-tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            width: 320px;
+            background: linear-gradient(135deg, rgba(15, 30, 35, 0.85), rgba(5, 15, 20, 0.95));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(45, 212, 191, 0.4);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-50%) translateY(15px) scale(0.95);
+            transform-origin: bottom center;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .planet-node:hover .planet-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .planet-tooltip h4 {
+            color: #ffffff;
+            font-size: 18px;
+            margin: 0 0 12px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .planet-tooltip h4::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .planet-tooltip p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.7;
+            margin: 0;
+            text-align: left;
+            white-space: normal;
+        }
+
+
+        /* ----------------------------------
+           保留原有的 Timeline & Bento 代码
+           ---------------------------------- */
+        .timeline-wrapper {
+            position: relative;
+            margin: 50px 0;
+            padding: 20px 0;
+        }
+
+        #svg-canvas-timeline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #curve-path {
+            fill: none;
+            stroke: url(#gradient);
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        .timeline-node {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 0;
+            overflow: visible;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .timeline-node.visible {
+            opacity: 1;
+        }
+
+        .timeline-dot {
+            cursor: pointer;
+            transition: r 0.3s cubic-bezier(0.16, 1, 0.3, 1), fill 0.3s ease;
+        }
+        .timeline-dot:hover {
+            fill: #fff;
+        }
+
+        .content-left {
+            position: absolute;
+            text-align: right;
+            padding-right: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .content-left:hover {
+            transform: translateY(-2px);
+        }
+
+        .content-right {
+            position: absolute;
+            text-align: left;
+            padding-left: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .content-right:hover {
+            transform: translateY(-2px);
+        }
+
+        .content-left h3,
+        .content-right h3 {
+            margin: 0 0 12px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .content-left .company,
+        .content-right .company {
+            color: var(--accent-color);
+            font-size: 16px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .content-left p,
+        .content-right p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.8;
+            margin: 0;
+        }
+
+        .date-display {
+            font-family: monospace;
+            font-size: 22px;
+            color: var(--text-secondary);
+            opacity: 0.8;
+            position: absolute;
+            white-space: nowrap;
+        }
+
+        .timeline-node:hover .date-display {
+            color: var(--accent-color);
+            opacity: 1;
+        }
+
+        .portfolio-section {
+            margin-top: 40px;
+        }
+        
+        .section-title {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: minmax(320px, auto);
+            gap: 30px;
+        }
+
+        .bento-item {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease;
+        }
+
+        .bento-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .bento-item h3 {
+            margin: 0 0 16px 0;
+            font-size: 24px;
+        }
+
+        .bento-item p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin: 0 0 30px 0;
+        }
+
+        .vibe-coding { grid-column: span 2; }
+        .ai-music { grid-column: span 1; }
+        .ai-images { grid-column: span 3; display: flex; flex-direction: row; align-items: center; gap: 40px;}
+        .ai-images > div:first-child { flex: 1; }
+        .ai-images .image-gallery { flex: 2; display: flex; gap: 20px; height: 100%;}
+        .gallery-box { flex: 1; background: rgba(255,255,255,0.05); border-radius: 12px; height: 200px;}
+
+        /* 响应式调整 */
+        @media (max-width: 1024px) {
+            .container { padding: 60px 20px; }
+            .hero-section h1 { font-size: 48px; }
+            .content-left h3, .content-right h3 { font-size: 22px; }
+            .date-display { font-size: 16px; }
+            .bento-grid { grid-template-columns: 1fr; }
+            .vibe-coding, .ai-music, .ai-images { grid-column: span 1; }
+            .ai-images { flex-direction: column; }
+            
+            /* 手机端银河系自适应调整 */
+            .planet-tooltip {
+                left: 50%;
+                top: auto;
+                bottom: calc(100% + 10px);
+                width: 260px;
+            }
+            .galaxy-wrapper { height: 400px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div class="container">
+    <div class="hero-section">
+        <div class="hero-header">
+            <h1>渊锋</h1>
+            <div class="title">数据产品经理 / Vibe Coder</div>
+            
+            <div class="contact-info">
+                <span>28岁</span><span class="dot"></span>
+                <span>北京</span><span class="dot"></span>
+                <span>13870632260</span><span class="dot"></span>
+                <span>3093684513@qq.com</span>
+            </div>
+        </div>
+
+        <!-- 调整层级：技能胶囊在上方 -->
+        <div class="capsule-container">
+            <span class="capsule">SQL / Python</span>
+            <span class="capsule">Tableau / Figma</span>
+            <span class="capsule">AI 工作流</span>
+            <span class="capsule">Vibe Coding</span>
+        </div>
+    </div>
+
+    <!-- 全新：Personality 数据银河系系统 -->
+    <div class="galaxy-wrapper" id="galaxy-system">
+        <!-- SVG 用于渲染固定的椭圆轨道 -->
+        <svg class="galaxy-orbits" id="galaxy-svg">
+            <!-- 轨道会由JS动态生成绘制以保证适配尺寸 -->
+        </svg>
+
+        <!-- 核心 Sphere -->
+        <div class="galaxy-core">
+            <div class="core-sphere"></div>
+            <div class="core-label">Personality</div>
+        </div>
+
+        <!-- 动态生成的 Planet Nodes 占位符容器 -->
+        <div id="planets-container"></div>
+    </div>
+
+    <!-- Timeline Section -->
+    <div class="timeline-wrapper" id="timeline-wrapper">
+        <svg id="svg-canvas-timeline" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.1" />
+                    <stop offset="20%" stop-color="#2dd4bf" stop-opacity="1" />
+                    <stop offset="80%" stop-color="#3b82f6" stop-opacity="1" />
+                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.1" />
+                </linearGradient>
+                <filter id="dot-glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="4" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <path id="curve-path" d=""></path>
+        </svg>
+
+        <!-- 节点1 -->
+        <div class="timeline-node" data-side="left">
+            <div class="center-point"></div>
+            <div class="content-left">
+                <h3>数据产品经理</h3>
+                <span class="company">京东零售 - 广告产研部</span>
+                <p>负责模型建设与平台应用。主导从0到1搭建LBS商业化看板，支持外卖数据看板监控，单日峰值快速突破千万；设计多场景测算分析方案并支持CEO决策。推进元数据管理平台自动化配置，提升75%操作效率。</p>
+            </div>
+            <div class="date-display">2025.05 – 至今</div>
+        </div>
+
+        <!-- 节点2 -->
+        <div class="timeline-node" data-side="right">
+            <div class="center-point"></div>
+            <div class="content-right">
+                <h3>数据产品 (Intern)</h3>
+                <span class="company">京东零售 - 广告产研部</span>
+                <p>负责数据应用中台和元数据管理平台的建设，聚焦用户看数需求与体验提升。主导解决商家圈选主商家的需求，从0到1完成平台建设（覆盖用户10+），实现人效提升10人天/月。</p>
+            </div>
+            <div class="date-display">2024.12 – 2025.03</div>
+        </div>
+        
+        <!-- 节点3 -->
+        <div class="timeline-node" data-side="left">
+            <div class="center-point"></div>
+            <div class="content-left">
+                <h3>数据产品 (Intern)</h3>
+                <span class="company">阿里巴巴 (本地生活) - 技术中心</span>
+                <p>参与流量宝平台建设，协同运营与算法同学制定触达率提升策略，并进行灰度测试，最终实现触达率24%的提升。搭建平台组件分析看板，支持用户进行数据明细与汇总分析，使看数效率提升20%。</p>
+            </div>
+            <div class="date-display">2024.06 – 2024.09</div>
+        </div>
+
+        <!-- 节点4 -->
+        <div class="timeline-node" data-side="right">
+            <div class="center-point"></div>
+            <div class="content-right">
+                <h3>数据产品 (Intern)</h3>
+                <span class="company">京东零售 - 广告产品部</span>
+                <p>支持并实现自定义配置生成表头复杂的“中国式报表”（覆盖500+用户）。洞察AIGC在数据产品中的应用趋势，从0到1规划基于大模型设计的“数多助手”，涵盖业务咨询、数据分析等AI赋能功能。</p>
+            </div>
+            <div class="date-display">2023.08 – 2024.06</div>
+        </div>
+
+        <!-- 节点5 -->
+        <div class="timeline-node" data-side="left">
+            <div class="center-point"></div>
+            <div class="content-left">
+                <h3>技术产品 (Intern)</h3>
+                <span class="company">蔚来汽车 - 数字系统</span>
+                <p>参与效能与工具链平台的建设。独立设计并开发了自动化 clone 工具，取代原始的手动脚本方式，使操作效率飙升80%。通过定位排查系统漏洞，重构上传校验逻辑，显著降低异常发生率。</p>
+            </div>
+            <div class="date-display">2023.04 – 2023.07</div>
+        </div>
+    </div>
+
+    <!-- Portfolio Section -->
+    <div class="portfolio-section">
+        <div class="section-title">Portfolio 作品集</div>
+        <div class="bento-grid">
+            <div class="bento-item vibe-coding">
+                <h3>Vibe Coding 实践</h3>
+                <p>利用先进 AI 工具结合业务逻辑生成的前端交互页面及数据业务组件大盘。</p>
+                <div style="flex:1; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; color: #666;">[ 交互演示区 / 数据大屏展示 ]</div>
+            </div>
+
+            <div class="bento-item ai-music">
+                <h3>AI 工作流设计</h3>
+                <p>设计自动化 AI 工作流与业务咨询功能，提升大厂研发效能。</p>
+                <div style="flex:1; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; color: #666;">[ 架构图 / 工作流演示 ]</div>
+            </div>
+
+            <div class="bento-item ai-images">
+                <div>
+                    <h3>数据可视化与大模型应用</h3>
+                    <p>复杂中国式报表、多场景测算分析看板及高质量产品原型的视觉产出与交互设计。</p>
+                </div>
+                <div class="image-gallery">
+                    <div class="gallery-box"></div>
+                    <div class="gallery-box"></div>
+                    <div class="gallery-box"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================
+    // 0. Galaxy 银河系交互动效系统
+    // ============================================
+    const galaxyData = [
+        {
+            label: 'Data Empowerment',
+            title: '全链路数据闭环',
+            desc: '具备数据采集、建模及数据应用平台建设经验，熟悉从数据生产到数据消费的完整业务链路。',
+            orbitIndex: 0, // 内圈
+            speed: 0.0015,
+            iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
+        },
+        {
+            label: 'AI Workflow',
+            title: 'AI 工作流引擎',
+            desc: '对AI技术有浓厚兴趣，具备搭建自动化 AI 工作流及 Vibe coding 的实战经验，深度赋能业务效率。',
+            orbitIndex: 1, // 中圈
+            speed: -0.0010, // 逆时针
+            iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>'
+        },
+        {
+            label: 'Product Execution',
+            title: '端到端产品落地',
+            desc: '具备竞品调研、产品架构设计、项目管理与跨部门协同的能力，拥有大量完整的从0到1落地经验。',
+            orbitIndex: 1, // 中圈 (与AI对立)
+            speed: -0.0010,
+            iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>'
+        },
+        {
+            label: 'Resilience',
+            title: '高压突破与解法',
+            desc: '抗压能力出色，能够在较高强度的工作节点中保持极度冷静，并有条理地拆解、应对复杂问题。',
+            orbitIndex: 2, // 外圈
+            speed: 0.0006,
+            iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>'
+        }
+    ];
+
+    let isGalaxyPaused = false;
+    let galaxyNodes = [];
+
+    function initGalaxy() {
+        const wrapper = document.getElementById('galaxy-system');
+        const svg = document.getElementById('galaxy-svg');
+        const container = document.getElementById('planets-container');
+        if (!wrapper) return;
+
+        container.innerHTML = '';
+        svg.innerHTML = '';
+
+        const W = wrapper.clientWidth;
+        const H = wrapper.clientHeight;
+        const centerX = W / 2;
+        const centerY = H / 2;
+
+        // 根据屏幕自适应轨道半径
+        const scale = Math.min(1, W / 900);
+        const orbits = [
+            { rx: 200 * scale, ry: 75 * scale },
+            { rx: 320 * scale, ry: 115 * scale },
+            { rx: 440 * scale, ry: 160 * scale }
+        ];
+
+        // 绘制 SVG 轨道圈
+        orbits.forEach(orbit => {
+            const ellipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+            ellipse.setAttribute('cx', centerX);
+            ellipse.setAttribute('cy', centerY);
+            ellipse.setAttribute('rx', orbit.rx);
+            ellipse.setAttribute('ry', orbit.ry);
+            ellipse.setAttribute('class', 'orbit-ring');
+            svg.appendChild(ellipse);
+        });
+
+        // 实例化行星节点
+        galaxyNodes = galaxyData.map((data, index) => {
+            // 设置固定的初始角度，确保同轨道的节点完美对立不重合
+            const startAngles = [
+                Math.PI * 0.2,  // 0: 内圈
+                Math.PI * 0.8,  // 1: 中圈节点 A
+                Math.PI * 1.8,  // 2: 中圈节点 B (与 A 相差 1.0 PI，形成 180 度完美对角)
+                Math.PI * 1.3   // 3: 外圈
+            ];
+            let initialAngle = startAngles[index];
+
+            const nodeEl = document.createElement('div');
+            nodeEl.className = 'planet-node';
+            nodeEl.innerHTML = `
+                <div class="planet-icon">${data.iconSvg}</div>
+                <div class="planet-label">${data.label}</div>
+                <div class="planet-tooltip">
+                    <h4>${data.title}</h4>
+                    <p>${data.desc}</p>
+                </div>
+            `;
+
+            // 悬停暂停动画
+            nodeEl.addEventListener('mouseenter', () => isGalaxyPaused = true);
+            nodeEl.addEventListener('mouseleave', () => isGalaxyPaused = false);
+
+            container.appendChild(nodeEl);
+
+            return {
+                el: nodeEl,
+                angle: initialAngle,
+                speed: data.speed,
+                rx: orbits[data.orbitIndex].rx,
+                ry: orbits[data.orbitIndex].ry,
+            };
+        });
+
+        requestAnimationFrame(renderGalaxy);
+    }
+
+    function renderGalaxy() {
+        if (!isGalaxyPaused) {
+            const wrapper = document.getElementById('galaxy-system');
+            const centerX = wrapper.clientWidth / 2;
+            const centerY = wrapper.clientHeight / 2;
+
+            galaxyNodes.forEach(node => {
+                node.angle += node.speed;
+                const x = centerX + node.rx * Math.cos(node.angle);
+                const y = centerY + node.ry * Math.sin(node.angle);
+                
+                node.el.style.left = `${x}px`;
+                node.el.style.top = `${y}px`;
+                // 根据Y轴产生 fake 3D 遮挡关系 (近大远小可以叠加 scale, 这里用 z-index)
+                node.el.style.zIndex = Math.floor(y);
+            });
+        }
+        requestAnimationFrame(renderGalaxy);
+    }
+
+
+    // ============================================
+    // 1. Timeline Catmull-Rom 样条插值
+    // ============================================
+
+    function drawCurve() {
+        var wrapper = document.getElementById('timeline-wrapper');
+        var svg = document.getElementById('svg-canvas-timeline');
+        var path = document.getElementById('curve-path');
+        var nodes = Array.from(document.querySelectorAll('.timeline-node'));
+
+        if (!wrapper || nodes.length === 0) return;
+
+        var W = wrapper.clientWidth;
+        var isMobile = window.innerWidth <= 1024;
+        var waveAmplitude = isMobile ? 20 : 100;
+        var verticalSpacing = isMobile ? 320 : 280;
+        var centerX = W / 2;
+
+        var extendY = verticalSpacing * 0.6; 
+
+        var anchors = [];
+        anchors.push({ x: centerX, y: extendY });
+        for (var i = 0; i < nodes.length; i++) {
+            var y = extendY + verticalSpacing * (i + 1);
+            var swing = (i % 2 === 0) ? -waveAmplitude : waveAmplitude;
+            anchors.push({ x: centerX + swing, y: y });
+        }
+        anchors.push({ x: centerX, y: extendY + verticalSpacing * (nodes.length + 1) });
+
+        var totalHeight = anchors[anchors.length - 1].y + extendY;
+        wrapper.style.height = totalHeight + 'px';
+        svg.setAttribute('width', W);
+        svg.setAttribute('height', totalHeight);
+
+        var d = 'M ' + anchors[0].x.toFixed(2) + ' ' + anchors[0].y.toFixed(2) + ' ';
+        for (var i = 1; i < anchors.length; i++) {
+            var curr = anchors[i - 1];
+            var next = anchors[i];
+            var dy = next.y - curr.y;
+            var cp1x = curr.x;
+            var cp1y = curr.y + dy / 3;
+            var cp2x = next.x;
+            var cp2y = next.y - dy / 3;
+            d += 'C ' + cp1x.toFixed(2) + ' ' + cp1y.toFixed(2) + ', ';
+            d += cp2x.toFixed(2) + ' ' + cp2y.toFixed(2) + ', ';
+            d += next.x.toFixed(2) + ' ' + next.y.toFixed(2) + ' ';
+        }
+
+        path.setAttribute('d', d);
+
+        var dotsGroup = document.getElementById('timeline-dots');
+        if (!dotsGroup) {
+            dotsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            dotsGroup.id = 'timeline-dots';
+            svg.appendChild(dotsGroup);
+        }
+        dotsGroup.innerHTML = '';
+        var svgNS = 'http://www.w3.org/2000/svg';
+        for (var i = 1; i <= nodes.length; i++) {
+            var a = anchors[i];
+            var glow = document.createElementNS(svgNS, 'circle');
+            glow.setAttribute('cx', a.x);
+            glow.setAttribute('cy', a.y);
+            glow.setAttribute('r', '11');
+            glow.setAttribute('fill', 'rgba(45, 212, 191, 0.15)');
+            dotsGroup.appendChild(glow);
+            var dot = document.createElementNS(svgNS, 'circle');
+            dot.setAttribute('cx', a.x);
+            dot.setAttribute('cy', a.y);
+            dot.setAttribute('r', '7');
+            dot.setAttribute('fill', '#2dd4bf');
+            dot.setAttribute('class', 'timeline-dot');
+            dot.setAttribute('filter', 'url(#dot-glow)');
+            dot.setAttribute('data-index', i - 1);
+            dotsGroup.appendChild(dot);
+        }
+        var contentWidth = isMobile ? W * 0.65 : Math.min((W / 2) - waveAmplitude - 60, 420);
+
+        nodes.forEach(function(node, i) {
+            var anchor = anchors[i + 1];
+            var isLeft = node.dataset.side === 'left';
+
+            var cp = node.querySelector('.center-point');
+            if (cp) cp.style.display = 'none';
+
+            var content = node.querySelector(isLeft ? '.content-left' : '.content-right');
+            if (isLeft) {
+                content.style.left = Math.max(0, anchor.x - contentWidth - 30) + 'px';
+                content.style.top = (anchor.y - 20) + 'px';
+                content.style.width = contentWidth + 'px';
+            } else {
+                content.style.left = (anchor.x + 30) + 'px';
+                content.style.top = (anchor.y - 20) + 'px';
+                content.style.width = contentWidth + 'px';
+            }
+
+            var dateEl = node.querySelector('.date-display');
+            if (isLeft) {
+                dateEl.style.left = (anchor.x + 30) + 'px';
+                dateEl.style.top = (anchor.y - 10) + 'px';
+                dateEl.style.textAlign = 'left';
+                dateEl.style.width = '';
+            } else {
+                dateEl.style.left = Math.max(0, anchor.x - contentWidth - 30) + 'px';
+                dateEl.style.top = (anchor.y - 10) + 'px';
+                dateEl.style.textAlign = 'right';
+                dateEl.style.width = contentWidth + 'px';
+            }
+        });
+
+        var pathLength = path.getTotalLength();
+        if (!path.dataset.animated) {
+            path.style.strokeDasharray = pathLength;
+            path.style.strokeDashoffset = pathLength;
+            path.getBoundingClientRect();
+            path.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+            path.style.strokeDashoffset = 0;
+            path.dataset.animated = 'true';
+        } else {
+            path.style.strokeDasharray = pathLength;
+            path.style.strokeDashoffset = 0;
+            path.style.transition = 'none';
+        }
+    }
+
+    // ============================================
+    // 2. 滚动出现动画
+    // ============================================
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.05 });
+
+    document.querySelectorAll('.timeline-node').forEach(function(node) {
+        observer.observe(node);
+    });
+
+    // ============================================
+    // 3. Three.js 粒子背景
+    // ============================================
+    function initThreeJS() {
+        var container = document.getElementById('canvas-container');
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        var particlesGeometry = new THREE.BufferGeometry();
+        var particlesCount = 300;
+        var posArray = new Float32Array(particlesCount * 3);
+
+        for(var i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 15;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        var material = new THREE.PointsMaterial({
+            size: 0.03,
+            color: 0x2dd4bf,
+            transparent: true,
+            opacity: 0.5
+        });
+
+        var particlesMesh = new THREE.Points(particlesGeometry, material);
+        scene.add(particlesMesh);
+        camera.position.z = 3;
+
+        var mouseX = 0;
+        var mouseY = 0;
+
+        document.addEventListener('mousemove', function(e) {
+            mouseX = (e.clientX / window.innerWidth) - 0.5;
+            mouseY = (e.clientY / window.innerHeight) - 0.5;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x += 0.0005;
+            
+            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 0.5 - camera.position.y) * 0.05;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initGalaxy();
+        drawCurve();
+    });
+    window.onload = function() {
+        initThreeJS();
+    };
+    
+    window.addEventListener('resize', () => {
+        initGalaxy();
+        drawCurve();
+    });
+</script>
+</body>
+</html>
